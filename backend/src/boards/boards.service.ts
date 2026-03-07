@@ -80,7 +80,7 @@ export class BoardsService {
       .insert({
         name: dto.name,
         icon: dto.icon || "Dashboard",
-        icon_color: dto.iconColor || "#10C2C0",
+        icon_color: dto.iconColor || "#1976d2",
       })
       .select("*")
       .single();

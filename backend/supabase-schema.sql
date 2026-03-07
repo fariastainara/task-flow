@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS boards (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   icon TEXT DEFAULT 'Dashboard',
-  icon_color TEXT DEFAULT '#10C2C0',
+  icon_color TEXT DEFAULT '#1976d2',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

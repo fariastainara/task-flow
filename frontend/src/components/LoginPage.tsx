@@ -205,6 +205,11 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
         sx={{
           position: "absolute",
           bottom: 40,
+          left: "50%",
+          transform: {
+            xs: "translateX(-58%)",
+            sm: "translateX(-50%)",
+          },
           zIndex: 1,
           width: 219,
           height: 62,

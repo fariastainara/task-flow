@@ -127,6 +127,21 @@ export default function App() {
     }
   }, [selectedBoardId, loadTasks, loadMembers]);
 
+  // Sincroniza assigneeName das tasks com os nomes atuais dos membros
+  useEffect(() => {
+    if (members.length === 0 || tasks.length === 0) return;
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (!t.assigneeId) return t;
+        const member = members.find((m) => m.userId === t.assigneeId);
+        if (member && member.name !== t.assigneeName) {
+          return { ...t, assigneeName: member.name };
+        }
+        return t;
+      }),
+    );
+  }, [members]);
+
   const handleCreateBoard = async (
     name: string,
     icon?: string,
@@ -485,7 +500,7 @@ export default function App() {
                               cursor: "pointer",
                               outline:
                                 filterByUserId === member.userId
-                                  ? "2px solid #10C2C0"
+                                  ? "2px solid #1976d2"
                                   : "none",
                               outlineOffset: 1,
                               opacity:
@@ -623,7 +638,7 @@ export default function App() {
                 </Typography>
                 <Typography
                   fontSize={isMobile ? 16 : 24}
-                  color="text.secondary"
+                  color={isMobile ? "text.primary" : "text.secondary"}
                   mb={4}
                 >
                   Crie seu primeiro quadro e comece a<br />
@@ -631,7 +646,10 @@ export default function App() {
                 </Typography>
                 <Button
                   variant="contained"
-                  onClick={() => setRequestCreateBoard(true)}
+                  onClick={() => {
+                    setRequestCreateBoard(true);
+                    if (isMobile) setSidebarOpen(true);
+                  }}
                   sx={{
                     bgcolor: "black",
                     color: "white",

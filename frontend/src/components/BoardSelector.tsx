@@ -113,7 +113,7 @@ function getBoardIcon(iconName?: string, iconColor?: string) {
 }
 
 const COLOR_OPTIONS = [
-  "#10C2C0",
+  "#1976d2",
   "#000000",
   "#616161",
   "#F44336",
@@ -167,9 +167,16 @@ export default function BoardSelector({
   const [createOpen, setCreateOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const isMobile = useMediaQuery("(max-width:768px)");
+
+  useEffect(() => {
+    if (!loadingBoards && boards.length === 0) {
+      setCollapsed(true);
+    }
+  }, [loadingBoards, boards.length]);
+
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("Dashboard");
-  const [newIconColor, setNewIconColor] = useState("#10C2C0");
+  const [newIconColor, setNewIconColor] = useState("#1976d2");
   const [inviteEmails, setInviteEmails] = useState<string[]>([]);
   const [inviteInput, setInviteInput] = useState("");
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
@@ -207,7 +214,7 @@ export default function BoardSelector({
     setEditingBoardId(null);
     setNewName("");
     setNewIcon("Dashboard");
-    setNewIconColor("#10C2C0");
+    setNewIconColor("#1976d2");
     setInviteEmails([]);
     setInviteInput("");
   };
@@ -228,7 +235,7 @@ export default function BoardSelector({
     setEditingBoardId(board.id);
     setNewName(board.name);
     setNewIcon(board.icon || "Dashboard");
-    setNewIconColor(board.iconColor || "#10C2C0");
+    setNewIconColor(board.iconColor || "#1976d2");
     setInviteEmails([]);
     setInviteInput("");
     setCreateOpen(true);
@@ -334,10 +341,10 @@ export default function BoardSelector({
               },
               "&:hover .board-actions": { opacity: 1 },
               "&.Mui-selected": {
-                bgcolor: "#10C2C014",
-                color: "#10C2C0",
-                "&:hover": { bgcolor: "#10C2C01F" },
-                "& .MuiListItemIcon-root": { color: "#10C2C0" },
+                bgcolor: "#1976d214",
+                color: "#1976d2",
+                "&:hover": { bgcolor: "#1976d21F" },
+                "& .MuiListItemIcon-root": { color: "#1976d2" },
               },
             }}
           >
@@ -442,14 +449,14 @@ export default function BoardSelector({
                 sx={{
                   border:
                     newIcon === option.name
-                      ? "2px solid #10C2C0"
+                      ? "2px solid #1976d2"
                       : "1px solid #e0e0e0",
                   borderRadius: 1,
                   width: 40,
                   height: 40,
                   bgcolor:
-                    newIcon === option.name ? "#10C2C014" : "transparent",
-                  color: newIcon === option.name ? "#10C2C0" : undefined,
+                    newIcon === option.name ? "#1976d214" : "transparent",
+                  color: newIcon === option.name ? "#1976d2" : undefined,
                 }}
               >
                 {option.icon}
@@ -475,10 +482,10 @@ export default function BoardSelector({
                   cursor: "pointer",
                   border:
                     newIconColor === color
-                      ? "2px solid #10C2C0"
+                      ? "2px solid #1976d2"
                       : "2px solid transparent",
                   outline:
-                    newIconColor === color ? "2px solid #10C2C0" : "none",
+                    newIconColor === color ? "2px solid #1976d2" : "none",
                   outlineOffset: 1,
                   "&:hover": { opacity: 0.8 },
                 }}
@@ -602,7 +609,7 @@ export default function BoardSelector({
               onClick={onLogout}
               sx={{
                 color: "text.secondary",
-                "&:hover": { bgcolor: "#10C2C014", color: "#10C2C0" },
+                "&:hover": { bgcolor: "#1976d214", color: "#1976d2" },
               }}
             >
               <LogoutOutlinedIcon fontSize="small" />
@@ -618,7 +625,7 @@ export default function BoardSelector({
               textTransform: "none",
               fontWeight: 500,
               justifyContent: "flex-start",
-              "&:hover": { bgcolor: "#10C2C014", color: "#10C2C0" },
+              "&:hover": { bgcolor: "#1976d214", color: "#1976d2" },
             }}
           >
             Sair
