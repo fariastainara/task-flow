@@ -8,23 +8,14 @@
   ],
   "routes": [
     {
-      "src": "/(.*)\\.(js|css|ico|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)",
-      "dest": "dist/main.js"
-    },
-    {
       "src": "/(.*)",
-      "methods": ["OPTIONS"],
+      "dest": "dist/main.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Max-Age": "86400"
-      },
-      "status": 204
-    },
-    {
-      "src": "/(.*)",
-      "dest": "dist/main.js"
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      }
     }
   ]
 }
