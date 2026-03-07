@@ -146,6 +146,7 @@ export default function App() {
     name: string,
     icon?: string,
     iconColor?: string,
+    bgColor?: string,
     emails?: string[],
   ) => {
     try {
@@ -153,6 +154,7 @@ export default function App() {
         name,
         icon,
         iconColor,
+        bgColor,
         userId: user!.id,
       });
       await loadBoards();
@@ -178,9 +180,10 @@ export default function App() {
     name: string,
     icon?: string,
     iconColor?: string,
+    bgColor?: string,
   ) => {
     try {
-      await boardApi.update(id, { name, icon, iconColor });
+      await boardApi.update(id, { name, icon, iconColor, bgColor });
       await loadBoards();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao editar quadro");
@@ -450,7 +453,8 @@ export default function App() {
             flex: 1,
             overflow: "auto",
             position: "relative",
-            bgcolor: selectedBoardId ? undefined : "white",
+            bgcolor:
+              selectedBoard?.bgColor || (selectedBoardId ? "#f5f5f5" : "white"),
           }}
         >
           {selectedBoardId ? (
@@ -545,13 +549,14 @@ export default function App() {
                     sx={{
                       color: "black",
                       borderColor: "#ccc",
+                      bgcolor: "white",
                       textTransform: "none",
                       fontWeight: 500,
                       minWidth: isMobile ? 40 : undefined,
                       px: isMobile ? 1 : undefined,
                       "&:hover": {
                         borderColor: "#999",
-                        bgcolor: "transparent",
+                        bgcolor: "white",
                       },
                     }}
                   >

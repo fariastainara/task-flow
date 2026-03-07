@@ -10,6 +10,7 @@ export interface Board {
   name: string;
   icon: string;
   iconColor: string;
+  bgColor: string;
   members: BoardMember[];
   createdAt: Date;
   updatedAt: Date;

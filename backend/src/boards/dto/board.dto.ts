@@ -14,6 +14,10 @@ export class CreateBoardDto {
   iconColor?: string;
 
   @IsString()
+  @IsOptional()
+  bgColor?: string;
+
+  @IsString()
   @IsNotEmpty()
   userId: string;
 }
@@ -30,4 +34,8 @@ export class UpdateBoardDto {
   @IsString()
   @IsOptional()
   iconColor?: string;
+
+  @IsString()
+  @IsOptional()
+  bgColor?: string;
 }

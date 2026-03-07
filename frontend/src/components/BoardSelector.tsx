@@ -129,6 +129,22 @@ const COLOR_OPTIONS = [
   "#FF5722",
 ];
 
+const BG_COLOR_OPTIONS = [
+  "#f5f5f5",
+  "#ffffff",
+  "#e3f2fd",
+  "#e8f5e9",
+  "#fff3e0",
+  "#fce4ec",
+  "#f3e5f5",
+  "#e8eaf6",
+  "#e0f7fa",
+  "#fff8e1",
+  "#efebe9",
+  "#fafafa",
+  "#e0e0e0",
+];
+
 interface Props {
   boards: Board[];
   selectedBoardId: string | null;
@@ -137,6 +153,7 @@ interface Props {
     name: string,
     icon?: string,
     iconColor?: string,
+    bgColor?: string,
     emails?: string[],
   ) => Promise<void> | void;
   onRename: (
@@ -144,6 +161,7 @@ interface Props {
     name: string,
     icon?: string,
     iconColor?: string,
+    bgColor?: string,
   ) => Promise<void> | void;
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
@@ -180,6 +198,7 @@ export default function BoardSelector({
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("Dashboard");
   const [newIconColor, setNewIconColor] = useState("#1976d2");
+  const [newBgColor, setNewBgColor] = useState("#f5f5f5");
   const [inviteEmails, setInviteEmails] = useState<string[]>([]);
   const [inviteInput, setInviteInput] = useState("");
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
@@ -197,12 +216,19 @@ export default function BoardSelector({
     setLoading(true);
     try {
       if (editingBoardId) {
-        await onRename(editingBoardId, newName.trim(), newIcon, newIconColor);
+        await onRename(
+          editingBoardId,
+          newName.trim(),
+          newIcon,
+          newIconColor,
+          newBgColor,
+        );
       } else {
         await onCreate(
           newName.trim(),
           newIcon,
           newIconColor,
+          newBgColor,
           inviteEmails.length > 0 ? inviteEmails : undefined,
         );
       }
@@ -218,6 +244,7 @@ export default function BoardSelector({
     setNewName("");
     setNewIcon("Dashboard");
     setNewIconColor("#1976d2");
+    setNewBgColor("#f5f5f5");
     setInviteEmails([]);
     setInviteInput("");
   };
@@ -239,6 +266,7 @@ export default function BoardSelector({
     setNewName(board.name);
     setNewIcon(board.icon || "Dashboard");
     setNewIconColor(board.iconColor || "#1976d2");
+    setNewBgColor(board.bgColor || "#f5f5f5");
     setInviteEmails([]);
     setInviteInput("");
     setCreateOpen(true);
@@ -500,6 +528,34 @@ export default function BoardSelector({
                       : "2px solid transparent",
                   outline:
                     newIconColor === color ? "2px solid #1976d2" : "none",
+                  outlineOffset: 1,
+                  "&:hover": { opacity: 0.8 },
+                }}
+              />
+            ))}
+          </Box>
+          <Typography
+            variant="subtitle1"
+            sx={{ mt: 3, mb: 2, fontWeight: 600 }}
+          >
+            Cor de fundo do quadro:
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {BG_COLOR_OPTIONS.map((color) => (
+              <Box
+                key={color}
+                onClick={() => setNewBgColor(color)}
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  bgcolor: color,
+                  cursor: "pointer",
+                  border:
+                    newBgColor === color
+                      ? "2px solid #1976d2"
+                      : "1px solid #e0e0e0",
+                  outline: newBgColor === color ? "2px solid #1976d2" : "none",
                   outlineOffset: 1,
                   "&:hover": { opacity: 0.8 },
                 }}

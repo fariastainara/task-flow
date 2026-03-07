@@ -20,9 +20,13 @@ CREATE TABLE IF NOT EXISTS boards (
   name TEXT NOT NULL,
   icon TEXT DEFAULT 'Dashboard',
   icon_color TEXT DEFAULT '#1976d2',
+  bg_color TEXT DEFAULT '#f5f5f5',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Migração: adicionar coluna bg_color se já existir a tabela
+ALTER TABLE boards ADD COLUMN IF NOT EXISTS bg_color TEXT DEFAULT '#f5f5f5';
 
 -- Tabela de membros do quadro
 CREATE TABLE IF NOT EXISTS board_members (

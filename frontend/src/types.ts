@@ -16,6 +16,7 @@ export interface Board {
   name: string;
   icon: string;
   iconColor: string;
+  bgColor: string;
   members: BoardMember[];
   createdAt: string;
   updatedAt: string;
@@ -25,6 +26,7 @@ export interface CreateBoardPayload {
   name: string;
   icon?: string;
   iconColor?: string;
+  bgColor?: string;
   userId: string;
 }
 
@@ -32,6 +34,7 @@ export interface UpdateBoardPayload {
   name?: string;
   icon?: string;
   iconColor?: string;
+  bgColor?: string;
 }
 
 export interface Task {

@@ -45,6 +45,7 @@ export class BoardsService {
         name: b.name,
         icon: b.icon,
         iconColor: b.icon_color,
+        bgColor: b.bg_color,
         members,
         createdAt: b.created_at,
         updatedAt: b.updated_at,
@@ -70,6 +71,7 @@ export class BoardsService {
       name: b.name,
       icon: b.icon,
       iconColor: b.icon_color,
+      bgColor: b.bg_color,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
@@ -83,6 +85,7 @@ export class BoardsService {
         name: dto.name,
         icon: dto.icon || "Dashboard",
         icon_color: dto.iconColor || "#1976d2",
+        bg_color: dto.bgColor || "#f5f5f5",
       })
       .select("*")
       .single();
@@ -101,6 +104,7 @@ export class BoardsService {
       name: b.name,
       icon: b.icon,
       iconColor: b.icon_color,
+      bgColor: b.bg_color,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
@@ -114,6 +118,7 @@ export class BoardsService {
     if (dto.name !== undefined) updateData.name = dto.name;
     if (dto.icon !== undefined) updateData.icon = dto.icon;
     if (dto.iconColor !== undefined) updateData.icon_color = dto.iconColor;
+    if (dto.bgColor !== undefined) updateData.bg_color = dto.bgColor;
 
     const { data: b, error } = await this.supabase
       .from("boards")
@@ -132,6 +137,7 @@ export class BoardsService {
       name: b.name,
       icon: b.icon,
       iconColor: b.icon_color,
+      bgColor: b.bg_color,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
@@ -230,6 +236,7 @@ export class BoardsService {
         name: `${original.name} (cópia)`,
         icon: original.icon,
         icon_color: original.iconColor,
+        bg_color: original.bgColor,
       })
       .select("*")
       .single();
@@ -262,6 +269,7 @@ export class BoardsService {
       name: b.name,
       icon: b.icon,
       iconColor: b.icon_color,
+      bgColor: b.bg_color,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
