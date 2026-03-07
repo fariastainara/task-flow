@@ -169,10 +169,10 @@ export default function BoardSelector({
   const isMobile = useMediaQuery("(max-width:768px)");
 
   useEffect(() => {
-    if (!loadingBoards && boards.length === 0) {
+    if (!isMobile && !loadingBoards && boards.length === 0) {
       setCollapsed(true);
     }
-  }, [loadingBoards, boards.length]);
+  }, [loadingBoards, boards.length, isMobile]);
 
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("Dashboard");
