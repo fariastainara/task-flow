@@ -17,11 +17,9 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
-  async findAll(@Query("boardId") boardId?: string): Promise<Task[]> {
-    if (boardId) {
-      return this.tasksService.findByBoard(boardId);
-    }
-    return this.tasksService.findAll();
+  async findAll(@Query("boardId") boardId: string): Promise<Task[]> {
+    if (!boardId) return [];
+    return this.tasksService.findByBoard(boardId);
   }
 
   @Get(":id")

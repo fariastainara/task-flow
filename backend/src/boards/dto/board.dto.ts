@@ -12,6 +12,10 @@ export class CreateBoardDto {
   @IsString()
   @IsOptional()
   iconColor?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }
 
 export class UpdateBoardDto {

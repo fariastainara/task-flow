@@ -18,7 +18,8 @@ export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
   @Get()
-  async findAll(@Query("userId") userId?: string): Promise<Board[]> {
+  async findAll(@Query("userId") userId: string): Promise<Board[]> {
+    if (!userId) return [];
     return this.boardsService.findAll(userId);
   }
 

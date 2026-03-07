@@ -25,6 +25,7 @@ export interface CreateBoardPayload {
   name: string;
   icon?: string;
   iconColor?: string;
+  userId: string;
 }
 
 export interface UpdateBoardPayload {

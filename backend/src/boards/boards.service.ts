@@ -15,46 +15,22 @@ export class BoardsService {
     @Inject(SUPABASE_CLIENT) private readonly supabase: SupabaseClient,
   ) {}
 
-  async findAll(userId?: string): Promise<Board[]> {
-    if (userId) {
-      // Busca os board_ids onde o usuário é membro
-      const { data: memberRows, error: memberError } = await this.supabase
-        .from("board_members")
-        .select("board_id")
-        .eq("user_id", userId);
+  async findAll(userId: string): Promise<Board[]> {
+    // Busca os board_ids onde o usuário é membro
+    const { data: memberRows, error: memberError } = await this.supabase
+      .from("board_members")
+      .select("board_id")
+      .eq("user_id", userId);
 
-      if (memberError) throw memberError;
+    if (memberError) throw memberError;
 
-      const boardIds = (memberRows || []).map((r: any) => r.board_id);
-      if (boardIds.length === 0) return [];
-
-      const { data: boards, error } = await this.supabase
-        .from("boards")
-        .select("*")
-        .in("id", boardIds)
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-
-      const result: Board[] = [];
-      for (const b of boards || []) {
-        const members = await this.getMembers(b.id);
-        result.push({
-          id: b.id,
-          name: b.name,
-          icon: b.icon,
-          iconColor: b.icon_color,
-          members,
-          createdAt: b.created_at,
-          updatedAt: b.updated_at,
-        });
-      }
-      return result;
-    }
+    const boardIds = (memberRows || []).map((r: any) => r.board_id);
+    if (boardIds.length === 0) return [];
 
     const { data: boards, error } = await this.supabase
       .from("boards")
       .select("*")
+      .in("id", boardIds)
       .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -111,12 +87,19 @@ export class BoardsService {
 
     if (error) throw error;
 
+    // Adiciona o criador como membro automaticamente
+    await this.supabase.from("board_members").insert({
+      board_id: b.id,
+      user_id: dto.userId,
+    });
+
+    const members = await this.getMembers(b.id);
     return {
       id: b.id,
       name: b.name,
       icon: b.icon,
       iconColor: b.icon_color,
-      members: [],
+      members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
     };

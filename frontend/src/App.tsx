@@ -13,11 +13,13 @@ import {
   Box,
   Tooltip,
   CircularProgress,
+  useMediaQuery,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import GroupIcon from "@mui/icons-material/GroupOutlined";
 import logoHeader from "./images/logo-header.svg";
 import backgroundEmptyKanban from "./images/background-empty-kanban.svg";
+import backgroundTelaMenor from "./images/backgroung-telas-menores.svg";
 import {
   Task,
   Board,
@@ -49,6 +51,7 @@ const theme = createTheme({
 
 export default function App() {
   const { isAuthenticated, user, logout } = useAuth();
+  const isMobile = useMediaQuery("(max-width:1024px)");
   const [boards, setBoards] = useState<Board[]>([]);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -125,12 +128,12 @@ export default function App() {
     emails?: string[],
   ) => {
     try {
-      const board = await boardApi.create({ name, icon, iconColor });
-      if (user?.email) {
-        try {
-          await boardApi.inviteMember(board.id, user.email);
-        } catch {}
-      }
+      const board = await boardApi.create({
+        name,
+        icon,
+        iconColor,
+        userId: user!.id,
+      });
       await loadBoards();
       setSelectedBoardId(board.id);
       if (emails && emails.length > 0) {
@@ -249,6 +252,51 @@ export default function App() {
       await handleUpdate(taskId, { status: newStatus });
     }
   };
+
+  if (isMobile) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: "white",
+            px: 4,
+            textAlign: "center",
+          }}
+        >
+          <Box
+            component="img"
+            src={logoHeader}
+            alt="TaskFlow"
+            sx={{ height: 40, mb: 5 }}
+          />
+          <Typography variant="h5" fontWeight={700} mb={2}>
+            Acesse pelo computador
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            maxWidth={360}
+            sx={{ position: "relative", zIndex: 1 }}
+          >
+            O TaskFlow ainda não tem suporte para telas pequenas. Para uma
+            melhor experiência, acesse pelo computador.
+          </Typography>
+          <Box
+            component="img"
+            src={backgroundTelaMenor}
+            alt="Acesse pelo computador"
+            sx={{ width: "100%", maxWidth: 360, mt: 4 }}
+          />
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
