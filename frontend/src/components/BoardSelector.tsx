@@ -25,6 +25,7 @@ import DashboardIcon from "@mui/icons-material/DashboardOutlined";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import EditIcon from "@mui/icons-material/EditOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import FitnessCenterOutlinedIcon from "@mui/icons-material/FitnessCenterOutlined";
@@ -145,6 +146,7 @@ interface Props {
     iconColor?: string,
   ) => Promise<void> | void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
   onOpenMembers: (boardId: string) => void;
   onLogout: () => void;
   requestCreateOpen?: boolean;
@@ -159,6 +161,7 @@ export default function BoardSelector({
   onCreate,
   onRename,
   onDelete,
+  onDuplicate,
   onLogout,
   requestCreateOpen,
   onRequestCreateClose,
@@ -380,6 +383,17 @@ export default function BoardSelector({
                     }}
                   >
                     <EditIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Duplicar">
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDuplicate(board.id);
+                    }}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: 16 }} />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Excluir">

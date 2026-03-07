@@ -200,6 +200,16 @@ export default function App() {
     }
   };
 
+  const handleDuplicateBoard = async (id: string) => {
+    try {
+      const board = await boardApi.duplicate(id, user!.id);
+      await loadBoards();
+      setSelectedBoardId(board.id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao duplicar quadro");
+    }
+  };
+
   const handleInviteMember = async (email: string) => {
     if (!selectedBoardId) return;
     await boardApi.inviteMember(selectedBoardId, email);
@@ -410,6 +420,7 @@ export default function App() {
               onCreate={handleCreateBoard}
               onRename={handleRenameBoard}
               onDelete={handleDeleteBoard}
+              onDuplicate={handleDuplicateBoard}
               onOpenMembers={handleOpenMembers}
               onLogout={logout}
               requestCreateOpen={requestCreateBoard}
@@ -425,6 +436,7 @@ export default function App() {
             onCreate={handleCreateBoard}
             onRename={handleRenameBoard}
             onDelete={handleDeleteBoard}
+            onDuplicate={handleDuplicateBoard}
             onOpenMembers={handleOpenMembers}
             onLogout={logout}
             requestCreateOpen={requestCreateBoard}

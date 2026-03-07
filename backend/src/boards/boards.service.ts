@@ -8,11 +8,13 @@ import { Board, BoardMember } from "./board.entity";
 import { CreateBoardDto, UpdateBoardDto } from "./dto/board.dto";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabase/supabase.module";
+import { TasksService } from "../tasks/tasks.service";
 
 @Injectable()
 export class BoardsService {
   constructor(
     @Inject(SUPABASE_CLIENT) private readonly supabase: SupabaseClient,
+    private readonly tasksService: TasksService,
   ) {}
 
   async findAll(userId: string): Promise<Board[]> {
@@ -216,6 +218,54 @@ export class BoardsService {
       .from("boards")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", boardId);
+  }
+
+  async duplicate(boardId: string, userId: string): Promise<Board> {
+    const original = await this.findOne(boardId);
+
+    // Cria o novo quadro
+    const { data: b, error } = await this.supabase
+      .from("boards")
+      .insert({
+        name: `${original.name} (cópia)`,
+        icon: original.icon,
+        icon_color: original.iconColor,
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    // Adiciona o usuário como membro
+    await this.supabase.from("board_members").insert({
+      board_id: b.id,
+      user_id: userId,
+    });
+
+    // Copia as tarefas do quadro original
+    const tasks = await this.tasksService.findByBoard(boardId);
+    for (const task of tasks) {
+      await this.tasksService.create({
+        boardId: b.id,
+        title: task.title,
+        description: task.description || undefined,
+        assigneeId: task.assigneeId || undefined,
+        assigneeName: task.assigneeName || undefined,
+        startDate: task.startDate || undefined,
+        dueDate: task.dueDate || undefined,
+      });
+    }
+
+    const members = await this.getMembers(b.id);
+    return {
+      id: b.id,
+      name: b.name,
+      icon: b.icon,
+      iconColor: b.icon_color,
+      members,
+      createdAt: b.created_at,
+      updatedAt: b.updated_at,
+    };
   }
 
   async getMembers(boardId: string): Promise<BoardMember[]> {

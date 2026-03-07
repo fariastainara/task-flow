@@ -41,6 +41,14 @@ export class BoardsController {
     return this.boardsService.update(id, dto);
   }
 
+  @Post(":id/duplicate")
+  async duplicate(
+    @Param("id") id: string,
+    @Body("userId") userId: string,
+  ): Promise<Board> {
+    return this.boardsService.duplicate(id, userId);
+  }
+
   @Delete(":id")
   async remove(@Param("id") id: string): Promise<void> {
     return this.boardsService.remove(id);

@@ -62,6 +62,15 @@ export const boardApi = {
     return handleResponse<void>(res);
   },
 
+  duplicate: async (id: string, userId: string): Promise<Board> => {
+    const res = await fetch(`${API_URL}/${encodeURIComponent(id)}/duplicate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    });
+    return handleResponse<Board>(res);
+  },
+
   getMembers: async (boardId: string): Promise<BoardMember[]> => {
     const res = await fetch(
       `${API_URL}/${encodeURIComponent(boardId)}/members`,
