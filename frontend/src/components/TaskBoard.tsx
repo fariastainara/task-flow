@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, useMediaQuery } from "@mui/material";
 import { Task, TaskStatus } from "../types";
 import TaskColumn from "./TaskColumn";
 
@@ -23,8 +23,14 @@ export default function TaskBoard({
   onDuplicate,
   onDrop,
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:768px)");
   return (
-    <Box display="flex" gap={2} flexWrap="wrap">
+    <Box
+      display="flex"
+      gap={2}
+      flexWrap="wrap"
+      flexDirection={isMobile ? "column" : "row"}
+    >
       {columns.map((col) => (
         <TaskColumn
           key={col.status}

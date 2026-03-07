@@ -105,7 +105,12 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
             autoComplete="email"
             placeholder="Digite seu e-mail"
             InputLabelProps={{ shrink: true }}
-            sx={{ mb: 3, width: 512, "& .MuiInputBase-root": { height: 56 } }}
+            sx={{
+              mb: 3,
+              width: "100%",
+              maxWidth: 512,
+              "& .MuiInputBase-root": { height: 56 },
+            }}
           />
           <TextField
             label="Senha"
@@ -117,7 +122,12 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
             autoComplete="current-password"
             placeholder="Digite sua senha"
             InputLabelProps={{ shrink: true }}
-            sx={{ mb: 5, width: 512, "& .MuiInputBase-root": { height: 56 } }}
+            sx={{
+              mb: 5,
+              width: "100%",
+              maxWidth: 512,
+              "& .MuiInputBase-root": { height: 56 },
+            }}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -144,7 +154,8 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
             disabled={loading}
             sx={{
               mb: 2,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               height: 56,
               bgcolor: "black",
               color: "white",
@@ -165,7 +176,7 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
             variant="body2"
             color="black"
             textAlign="center"
-            sx={{ width: 512 }}
+            sx={{ width: "100%", maxWidth: 512 }}
           >
             Não tem conta?{" "}
             <Button

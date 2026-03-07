@@ -12,6 +12,7 @@ import {
   IconButton,
   Stack,
   CircularProgress,
+  useMediaQuery,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import {
@@ -50,6 +51,7 @@ export default function TaskForm({
 }: Props) {
   const { user } = useAuth();
   const isEditMode = !!task;
+  const isMobile = useMediaQuery("(max-width:768px)");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
@@ -125,11 +127,17 @@ export default function TaskForm({
       onClose={handleClose}
       PaperProps={{
         sx: {
-          width: "40%",
+          width: isMobile ? "100%" : "40%",
         },
       }}
     >
-      <Stack bgcolor="grey.50" px={4} pt={4} pb={2} height="100%">
+      <Stack
+        bgcolor="grey.50"
+        px={isMobile ? 2 : 4}
+        pt={isMobile ? 2 : 4}
+        pb={2}
+        height="100%"
+      >
         {/* Header */}
         <Box display="flex" flexDirection="column" gap={4} pb={4}>
           <Stack

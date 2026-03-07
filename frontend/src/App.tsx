@@ -10,16 +10,19 @@ import {
   Alert,
   Button,
   Avatar,
+  AvatarGroup,
   Box,
   Tooltip,
   CircularProgress,
   useMediaQuery,
+  IconButton,
+  Drawer,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import GroupIcon from "@mui/icons-material/GroupOutlined";
+import MenuIcon from "@mui/icons-material/Menu";
 import logoHeader from "./images/logo-header.svg";
 import backgroundEmptyKanban from "./images/background-empty-kanban.svg";
-import backgroundTelaMenor from "./images/backgroung-telas-menores.svg";
 import {
   Task,
   Board,
@@ -51,7 +54,7 @@ const theme = createTheme({
 
 export default function App() {
   const { isAuthenticated, user, logout } = useAuth();
-  const isMobile = useMediaQuery("(max-width:1024px)");
+  const isMobile = useMediaQuery("(max-width:768px)");
   const [boards, setBoards] = useState<Board[]>([]);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -64,6 +67,8 @@ export default function App() {
   const [membersOpen, setMembersOpen] = useState(false);
   const [members, setMembers] = useState<BoardMember[]>([]);
   const [loadingBoards, setLoadingBoards] = useState(true);
+  const [filterByUserId, setFilterByUserId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadBoards = useCallback(async () => {
     if (boards.length === 0) {
@@ -118,6 +123,7 @@ export default function App() {
     if (selectedBoardId) {
       loadTasks();
       loadMembers();
+      setFilterByUserId(null);
     }
   }, [selectedBoardId, loadTasks, loadMembers]);
 
@@ -253,47 +259,15 @@ export default function App() {
     }
   };
 
-  if (isMobile) {
+  if (isMobile && !isAuthenticated) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box
-          sx={{
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "white",
-            px: 4,
-            textAlign: "center",
-          }}
-        >
-          <Box
-            component="img"
-            src={logoHeader}
-            alt="TaskFlow"
-            sx={{ height: 40, mb: 5 }}
-          />
-          <Typography variant="h5" fontWeight={700} mb={2}>
-            Acesse pelo computador
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            maxWidth={360}
-            sx={{ position: "relative", zIndex: 1 }}
-          >
-            O TaskFlow ainda não tem suporte para telas pequenas. Para uma
-            melhor experiência, acesse pelo computador.
-          </Typography>
-          <Box
-            component="img"
-            src={backgroundTelaMenor}
-            alt="Acesse pelo computador"
-            sx={{ width: "100%", maxWidth: 360, mt: 4 }}
-          />
-        </Box>
+        {authPage === "login" ? (
+          <LoginPage onSwitchToRegister={() => setAuthPage("register")} />
+        ) : (
+          <RegisterPage onSwitchToLogin={() => setAuthPage("login")} />
+        )}
       </ThemeProvider>
     );
   }
@@ -324,12 +298,30 @@ export default function App() {
           borderBottom: "1px solid #e0e0e0",
         }}
       >
-        <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Toolbar
+          sx={{
+            justifyContent: "space-between",
+            ...(isMobile && { position: "relative" }),
+          }}
+        >
+          {isMobile && (
+            <IconButton onClick={() => setSidebarOpen(true)}>
+              <MenuIcon />
+            </IconButton>
+          )}
           <Box
             component="img"
             src={logoHeader}
             alt="taskflow"
-            sx={{ width: 178, height: 42 }}
+            sx={{
+              width: isMobile ? 130 : 178,
+              height: isMobile ? 32 : 42,
+              ...(isMobile && {
+                position: "absolute",
+                left: "50%",
+                transform: "translateX(-50%)",
+              }),
+            }}
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Tooltip title="Editar perfil">
@@ -352,6 +344,7 @@ export default function App() {
                     fontWeight: 700,
                     fontSize: 12,
                     mr: 1,
+                    display: isMobile ? "none" : "block",
                   }}
                 >
                   {user?.name}
@@ -381,19 +374,49 @@ export default function App() {
       </AppBar>
 
       <Box sx={{ display: "flex", height: "calc(100vh - 64px)" }}>
-        <BoardSelector
-          boards={boards}
-          selectedBoardId={selectedBoardId}
-          onSelect={setSelectedBoardId}
-          onCreate={handleCreateBoard}
-          onRename={handleRenameBoard}
-          onDelete={handleDeleteBoard}
-          onOpenMembers={handleOpenMembers}
-          onLogout={logout}
-          requestCreateOpen={requestCreateBoard}
-          onRequestCreateClose={() => setRequestCreateBoard(false)}
-          loadingBoards={loadingBoards}
-        />
+        {isMobile ? (
+          <Drawer
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+            PaperProps={{
+              sx: {
+                width: 260,
+                overflow: "hidden",
+              },
+            }}
+          >
+            <BoardSelector
+              boards={boards}
+              selectedBoardId={selectedBoardId}
+              onSelect={(id) => {
+                setSelectedBoardId(id);
+                setSidebarOpen(false);
+              }}
+              onCreate={handleCreateBoard}
+              onRename={handleRenameBoard}
+              onDelete={handleDeleteBoard}
+              onOpenMembers={handleOpenMembers}
+              onLogout={logout}
+              requestCreateOpen={requestCreateBoard}
+              onRequestCreateClose={() => setRequestCreateBoard(false)}
+              loadingBoards={loadingBoards}
+            />
+          </Drawer>
+        ) : (
+          <BoardSelector
+            boards={boards}
+            selectedBoardId={selectedBoardId}
+            onSelect={setSelectedBoardId}
+            onCreate={handleCreateBoard}
+            onRename={handleRenameBoard}
+            onDelete={handleDeleteBoard}
+            onOpenMembers={handleOpenMembers}
+            onLogout={logout}
+            requestCreateOpen={requestCreateBoard}
+            onRequestCreateClose={() => setRequestCreateBoard(false)}
+            loadingBoards={loadingBoards}
+          />
+        )}
 
         <Box
           sx={{
@@ -404,58 +427,133 @@ export default function App() {
           }}
         >
           {selectedBoardId ? (
-            <Box sx={{ py: 3, px: 3, minHeight: "80vh" }}>
+            <Box
+              sx={{
+                py: isMobile ? 2 : 3,
+                px: isMobile ? 2 : 3,
+                minHeight: "80vh",
+              }}
+            >
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? 1.5 : 0,
                   mb: 3,
                 }}
               >
-                <Typography variant="h5" fontWeight={400} color="text.primary">
-                  {boards.find((b) => b.id === selectedBoardId)?.name}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    fontWeight={400}
+                    color="text.primary"
+                  >
+                    {boards.find((b) => b.id === selectedBoardId)?.name}
+                  </Typography>
+                  {members.length > 0 && (
+                    <AvatarGroup
+                      max={5}
+                      sx={{
+                        "& .MuiAvatar-root": {
+                          width: 32,
+                          height: 32,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          border: "2px solid white",
+                        },
+                      }}
+                    >
+                      {members.map((member) => (
+                        <Tooltip key={member.userId} title={member.name}>
+                          <Avatar
+                            src={member.avatar}
+                            onClick={() =>
+                              setFilterByUserId((prev) =>
+                                prev === member.userId ? null : member.userId,
+                              )
+                            }
+                            sx={{
+                              cursor: "pointer",
+                              outline:
+                                filterByUserId === member.userId
+                                  ? "2px solid #10C2C0"
+                                  : "none",
+                              outlineOffset: 1,
+                              opacity:
+                                filterByUserId &&
+                                filterByUserId !== member.userId
+                                  ? 0.4
+                                  : 1,
+                              transition: "all 0.2s",
+                            }}
+                          >
+                            {!member.avatar &&
+                              member.name
+                                ?.split(" ")
+                                .filter(Boolean)
+                                .map((w) => w[0])
+                                .slice(0, 2)
+                                .join("")
+                                .toUpperCase()}
+                          </Avatar>
+                        </Tooltip>
+                      ))}
+                    </AvatarGroup>
+                  )}
+                </Box>
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button
                     variant="outlined"
-                    startIcon={<GroupIcon />}
+                    startIcon={isMobile ? undefined : <GroupIcon />}
                     onClick={() => handleOpenMembers(selectedBoardId)}
-                    disableRipple
                     sx={{
-                      color: "text.primary",
+                      color: "black",
                       borderColor: "#ccc",
                       textTransform: "none",
                       fontWeight: 500,
+                      minWidth: isMobile ? 40 : undefined,
+                      px: isMobile ? 1 : undefined,
                       "&:hover": {
                         borderColor: "#999",
                         bgcolor: "transparent",
                       },
-                      "&:active": {
-                        boxShadow: "none",
-                      },
                     }}
                   >
-                    Membros
+                    {isMobile ? <GroupIcon /> : "Membros"}
                   </Button>
                   <Button
                     variant="contained"
-                    startIcon={<AddIcon />}
+                    startIcon={isMobile ? undefined : <AddIcon />}
                     onClick={() => setCreateOpen(true)}
                     sx={{
                       bgcolor: "black",
                       color: "white",
                       textTransform: "none",
                       fontWeight: 500,
+                      minWidth: isMobile ? 40 : undefined,
+                      px: isMobile ? 1 : undefined,
                       "&:hover": { bgcolor: "#333" },
                     }}
                   >
-                    Nova tarefa
+                    {isMobile ? <AddIcon /> : "Nova tarefa"}
                   </Button>
                 </Box>
               </Box>
               <TaskBoard
-                tasks={tasks}
+                tasks={
+                  filterByUserId
+                    ? tasks.filter((t) => t.assigneeId === filterByUserId)
+                    : tasks
+                }
                 onEdit={setEditTask}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
@@ -509,21 +607,25 @@ export default function App() {
                   position: "relative",
                   zIndex: 1,
                   maxWidth: 900,
-                  px: 4,
-                  ml: 4,
-                  mt: -4,
+                  px: isMobile ? 2 : 4,
+                  ml: isMobile ? 0 : 4,
+                  mt: isMobile ? 0 : -4,
                 }}
               >
                 <Typography
                   fontWeight={700}
-                  fontSize={70}
+                  fontSize={isMobile ? 32 : 70}
                   lineHeight={1.1}
                   color="black"
                   mb={2}
                 >
                   Organize suas tarefas em um só lugar.
                 </Typography>
-                <Typography fontSize={24} color="text.secondary" mb={4}>
+                <Typography
+                  fontSize={isMobile ? 16 : 24}
+                  color="text.secondary"
+                  mb={4}
+                >
                   Crie seu primeiro quadro e comece a<br />
                   gerenciar suas atividades.
                 </Typography>

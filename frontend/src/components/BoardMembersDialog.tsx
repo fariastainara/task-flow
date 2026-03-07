@@ -12,6 +12,13 @@ import {
   Stack,
   Chip,
   Alert,
+  Avatar,
+  CircularProgress,
+  Divider,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 
@@ -27,6 +34,7 @@ interface Props {
 export default function BoardMembersDialog({
   open,
   boardName,
+  members,
   onClose,
   onInvite,
 }: Props) {
@@ -152,6 +160,46 @@ export default function BoardMembersDialog({
             {error}
           </Alert>
         )}
+        {members.length > 0 && (
+          <>
+            <Divider sx={{ mt: 4, mb: 3 }} />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+              Membros do quadro ({members.length})
+            </Typography>
+            <List dense disablePadding>
+              {members.map((member) => (
+                <ListItem key={member.userId} disableGutters>
+                  <ListItemAvatar sx={{ minWidth: 40 }}>
+                    <Avatar
+                      src={member.avatar}
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        fontSize: 13,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {!member.avatar &&
+                        member.name
+                          ?.split(" ")
+                          .filter(Boolean)
+                          .map((w) => w[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={member.name}
+                    secondary={member.email}
+                    primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
+                    secondaryTypographyProps={{ fontSize: 12 }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Stack direction="row" spacing={1} alignItems="center" px={2} py={1}>
@@ -180,7 +228,11 @@ export default function BoardMembersDialog({
               "&:hover": { bgcolor: "#333" },
             }}
           >
-            Convidar
+            {loading ? (
+              <CircularProgress size={20} sx={{ color: "white" }} />
+            ) : (
+              "Convidar"
+            )}
           </Button>
         </Stack>
       </DialogActions>

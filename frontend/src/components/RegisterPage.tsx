@@ -236,7 +236,8 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             placeholder="Digite seu nome"
             sx={{
               mb: 3,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               "& .MuiInputBase-root": { height: 56 },
             }}
           />
@@ -252,7 +253,8 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             placeholder="Digite seu e-mail"
             sx={{
               mb: 3,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               "& .MuiInputBase-root": { height: 56 },
             }}
           />
@@ -268,7 +270,8 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             placeholder="Digite sua senha"
             sx={{
               mb: 3,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               "& .MuiInputBase-root": { height: 56 },
             }}
             InputProps={{
@@ -301,7 +304,8 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             placeholder="Confirme sua senha"
             sx={{
               mb: 5,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               "& .MuiInputBase-root": { height: 56 },
             }}
             InputProps={{
@@ -330,7 +334,8 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             disabled={loading}
             sx={{
               mb: 2,
-              width: 512,
+              width: "100%",
+              maxWidth: 512,
               height: 56,
               bgcolor: "black",
               color: "white",
@@ -351,7 +356,7 @@ export default function RegisterPage({ onSwitchToLogin }: Props) {
             variant="body2"
             color="black"
             textAlign="center"
-            sx={{ width: 512 }}
+            sx={{ width: "100%", maxWidth: 512 }}
           >
             Já possui uma conta?{" "}
             <Button

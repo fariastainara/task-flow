@@ -7,6 +7,7 @@ import {
   Tooltip,
   Divider,
   Chip,
+  useMediaQuery,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/EditOutlined";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -55,6 +56,7 @@ export default function TaskCard({
   onDelete,
   onDuplicate,
 }: Props) {
+  const isMobile = useMediaQuery("(max-width:768px)");
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData("text/plain", task.id);
     e.dataTransfer.effectAllowed = "move";
@@ -69,7 +71,10 @@ export default function TaskCard({
         transition: "box-shadow 0.2s",
         "&:hover": { boxShadow: 3 },
         borderRadius: 2,
-        "& .card-actions": { opacity: 0, transition: "opacity 0.2s" },
+        "& .card-actions": {
+          opacity: isMobile ? 1 : 0,
+          transition: "opacity 0.2s",
+        },
         "&:hover .card-actions": { opacity: 1 },
       }}
       elevation={0}

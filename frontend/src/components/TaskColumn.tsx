@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Typography, Paper, Avatar } from "@mui/material";
+import { Box, Typography, Paper, Avatar, useMediaQuery } from "@mui/material";
 import { Task, TaskStatus } from "../types";
 import TaskCard from "./TaskCard";
 import emptyColumn from "../images/empty-column.svg";
@@ -47,6 +47,7 @@ export default function TaskColumn({
   const filtered = tasks.filter((t) => t.status === status);
   const [dragOver, setDragOver] = useState(false);
   const config = columnConfig[status];
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -72,7 +73,7 @@ export default function TaskColumn({
       elevation={0}
       sx={{
         flex: 1,
-        minWidth: 300,
+        minWidth: isMobile ? "100%" : 300,
         p: 2,
         backgroundColor: config.bg,
         borderRadius: 3,

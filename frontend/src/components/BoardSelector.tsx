@@ -19,6 +19,7 @@ import {
   Stack,
   Chip,
   CircularProgress,
+  useMediaQuery,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/DashboardOutlined";
 import AddIcon from "@mui/icons-material/AddOutlined";
@@ -165,6 +166,7 @@ export default function BoardSelector({
 }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useMediaQuery("(max-width:768px)");
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("Dashboard");
   const [newIconColor, setNewIconColor] = useState("#10C2C0");
@@ -268,15 +270,17 @@ export default function BoardSelector({
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip title={collapsed ? "Expandir" : "Recolher"}>
-            <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
-              {collapsed ? (
-                <ChevronRightIcon sx={{ color: "text.primary" }} />
-              ) : (
-                <ChevronLeftIcon sx={{ color: "text.primary" }} />
-              )}
-            </IconButton>
-          </Tooltip>
+          {!isMobile && (
+            <Tooltip title={collapsed ? "Expandir" : "Recolher"}>
+              <IconButton size="small" onClick={() => setCollapsed(!collapsed)}>
+                {collapsed ? (
+                  <ChevronRightIcon sx={{ color: "text.primary" }} />
+                ) : (
+                  <ChevronLeftIcon sx={{ color: "text.primary" }} />
+                )}
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       </Box>
 
