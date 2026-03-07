@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/main.js",
+      "src": "api/index.js",
       "use": "@vercel/node"
     }
   ],
@@ -19,13 +19,8 @@
       "status": 204
     },
     {
-      "src": "/.*",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      },
-      "dest": "dist/main.js"
+      "src": "/(.*)",
+      "dest": "api/index.js"
     }
   ]
 }
