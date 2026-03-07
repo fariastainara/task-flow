@@ -9,12 +9,9 @@ async function getApp(): Promise<INestApplication> {
   if (!cachedApp) {
     cachedApp = await NestFactory.create(AppModule);
     cachedApp.enableCors({
-      origin: process.env.FRONTEND_URL
-        ? process.env.FRONTEND_URL.split(",").map((o) => o.trim())
-        : "http://localhost:5173",
+      origin: "*",
       methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
       allowedHeaders: "Content-Type,Authorization",
-      credentials: true,
     });
     cachedApp.useGlobalPipes(
       new ValidationPipe({ whitelist: true, transform: true }),
@@ -26,6 +23,21 @@ async function getApp(): Promise<INestApplication> {
 
 // Vercel serverless handler
 export default async function handler(req: any, res: any) {
+  // Handle preflight OPTIONS directly
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization",
+    );
+    res.status(204).end();
+    return;
+  }
+
   const app = await getApp();
   const server = app.getHttpAdapter().getInstance();
   return server(req, res);

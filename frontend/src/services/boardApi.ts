@@ -5,7 +5,12 @@ import {
   UpdateBoardPayload,
 } from "../types";
 
-const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/boards`;
+function normalizeUrl(url: string): string {
+  if (url && !/^https?:\/\//i.test(url)) return `https://${url}`;
+  return url;
+}
+
+const API_URL = `${normalizeUrl(import.meta.env.VITE_API_URL || "http://localhost:3000")}/boards`;
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {

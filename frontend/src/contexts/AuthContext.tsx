@@ -34,7 +34,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/auth`;
+function normalizeUrl(url: string): string {
+  if (url && !/^https?:\/\//i.test(url)) return `https://${url}`;
+  return url;
+}
+
+const API_URL = `${normalizeUrl(import.meta.env.VITE_API_URL || "http://localhost:3000")}/auth`;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
