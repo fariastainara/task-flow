@@ -17,16 +17,19 @@ import {
   useMediaQuery,
   IconButton,
   Drawer,
+  Badge,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import GroupIcon from "@mui/icons-material/GroupOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import logoHeader from "./images/logo-header.svg";
 import backgroundEmptyKanban from "./images/background-empty-kanban.svg";
 import {
   Task,
   Board,
   BoardMember,
+  BoardInvitation,
   TaskStatus,
   CreateTaskPayload,
   UpdateTaskPayload,
@@ -40,6 +43,7 @@ import RegisterPage from "./components/RegisterPage";
 import EditProfileDialog from "./components/EditProfileDialog";
 import BoardSelector from "./components/BoardSelector";
 import BoardMembersDialog from "./components/BoardMembersDialog";
+import PendingInvitesDialog from "./components/PendingInvitesDialog";
 import { useAuth } from "./contexts/AuthContext";
 
 const theme = createTheme({
@@ -66,6 +70,11 @@ export default function App() {
   const [requestCreateBoard, setRequestCreateBoard] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [members, setMembers] = useState<BoardMember[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<BoardInvitation[]>([]);
+  const [respondingInviteId, setRespondingInviteId] = useState<string | null>(
+    null,
+  );
+  const [invitesOpen, setInvitesOpen] = useState(false);
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [filterByUserId, setFilterByUserId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -103,8 +112,33 @@ export default function App() {
   useEffect(() => {
     if (isAuthenticated) {
       loadBoards();
+      if (user?.id) {
+        boardApi
+          .getPendingInvites(user.id)
+          .then(setPendingInvites)
+          .catch((err) => {
+            setError(
+              err instanceof Error ? err.message : "Erro ao carregar convites",
+            );
+          });
+      }
     }
-  }, [isAuthenticated, loadBoards]);
+  }, [isAuthenticated, loadBoards, user?.id]);
+
+  const loadPendingInvites = useCallback(async () => {
+    if (!user?.id) {
+      setPendingInvites([]);
+      return;
+    }
+    try {
+      const invites = await boardApi.getPendingInvites(user.id);
+      setPendingInvites(invites);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao carregar convites",
+      );
+    }
+  }, [user?.id]);
 
   const loadMembers = useCallback(async () => {
     if (!selectedBoardId) {
@@ -236,6 +270,24 @@ export default function App() {
     setMembersOpen(true);
   };
 
+  const handleRespondInvite = async (boardId: string, accept: boolean) => {
+    if (!user?.id) return;
+    setRespondingInviteId(boardId);
+    try {
+      await boardApi.respondToInvite(boardId, user.id, accept);
+      await loadPendingInvites();
+      if (accept) {
+        await loadBoards();
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erro ao responder convite",
+      );
+    } finally {
+      setRespondingInviteId(null);
+    }
+  };
+
   const handleCreate = async (data: CreateTaskPayload) => {
     try {
       await taskApi.create(data);
@@ -352,6 +404,25 @@ export default function App() {
             }}
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Tooltip title="Convites pendentes">
+              <IconButton onClick={() => setInvitesOpen(true)} size="small">
+                <Badge
+                  color="error"
+                  badgeContent={pendingInvites.length}
+                  invisible={pendingInvites.length === 0}
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      fontSize: 10,
+                      height: 16,
+                      minWidth: 16,
+                      padding: "0 4px",
+                    },
+                  }}
+                >
+                  <NotificationsNoneOutlinedIcon sx={{ fontSize: 20 }} />
+                </Badge>
+              </IconButton>
+            </Tooltip>
             <Tooltip title="Editar perfil">
               <Box
                 onClick={() => setProfileOpen(true)}
@@ -429,6 +500,8 @@ export default function App() {
               requestCreateOpen={requestCreateBoard}
               onRequestCreateClose={() => setRequestCreateBoard(false)}
               loadingBoards={loadingBoards}
+              pendingInvitesCount={pendingInvites.length}
+              onOpenInvites={() => setInvitesOpen(true)}
             />
           </Drawer>
         ) : (
@@ -445,6 +518,8 @@ export default function App() {
             requestCreateOpen={requestCreateBoard}
             onRequestCreateClose={() => setRequestCreateBoard(false)}
             loadingBoards={loadingBoards}
+            pendingInvitesCount={pendingInvites.length}
+            onOpenInvites={() => setInvitesOpen(true)}
           />
         )}
 
@@ -712,6 +787,14 @@ export default function App() {
       <EditProfileDialog
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
+      />
+
+      <PendingInvitesDialog
+        open={invitesOpen}
+        invites={pendingInvites}
+        respondingInviteId={respondingInviteId}
+        onClose={() => setInvitesOpen(false)}
+        onRespond={handleRespondInvite}
       />
 
       {selectedBoard && (

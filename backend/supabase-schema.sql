@@ -33,9 +33,22 @@ CREATE TABLE IF NOT EXISTS board_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'ACCEPTED' CHECK (status IN ('PENDING', 'ACCEPTED', 'DECLINED')),
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(board_id, user_id)
 );
+
+ALTER TABLE board_members
+  ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACCEPTED';
+
+UPDATE board_members
+SET status = 'ACCEPTED'
+WHERE status IS NULL;
+
+ALTER TABLE board_members DROP CONSTRAINT IF EXISTS board_members_status_check;
+ALTER TABLE board_members
+  ADD CONSTRAINT board_members_status_check
+  CHECK (status IN ('PENDING', 'ACCEPTED', 'DECLINED'));
 
 -- Tabela de tarefas
 CREATE TABLE IF NOT EXISTS tasks (

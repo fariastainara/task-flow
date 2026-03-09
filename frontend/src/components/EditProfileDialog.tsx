@@ -108,7 +108,7 @@ export default function EditProfileDialog({ open, onClose }: Props) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            pr: 4,
+            pr: 2,
           }}
         >
           Editar perfil

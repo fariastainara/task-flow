@@ -11,7 +11,8 @@ import {
 import { BoardsService } from "./boards.service";
 import { CreateBoardDto, UpdateBoardDto } from "./dto/board.dto";
 import { InviteMemberDto } from "./dto/invite-member.dto";
-import { Board, BoardMember } from "./board.entity";
+import { RespondInviteDto } from "./dto/respond-invite.dto";
+import { Board, BoardInvitation, BoardMember } from "./board.entity";
 
 @Controller("boards")
 export class BoardsController {
@@ -21,6 +22,14 @@ export class BoardsController {
   async findAll(@Query("userId") userId: string): Promise<Board[]> {
     if (!userId) return [];
     return this.boardsService.findAll(userId);
+  }
+
+  @Get("invitations/pending")
+  async getPendingInvites(
+    @Query("userId") userId: string,
+  ): Promise<BoardInvitation[]> {
+    if (!userId) return [];
+    return this.boardsService.getPendingInvites(userId);
   }
 
   @Get(":id")
@@ -65,6 +74,14 @@ export class BoardsController {
     @Body() dto: InviteMemberDto,
   ): Promise<BoardMember> {
     return this.boardsService.inviteMember(id, dto.email);
+  }
+
+  @Post(":id/invitations/respond")
+  async respondToInvite(
+    @Param("id") id: string,
+    @Body() dto: RespondInviteDto,
+  ): Promise<void> {
+    return this.boardsService.respondToInvite(id, dto.userId, dto.accept);
   }
 
   @Delete(":id/members/:userId")

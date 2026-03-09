@@ -1,5 +1,6 @@
 import {
   Board,
+  BoardInvitation,
   BoardMember,
   CreateBoardPayload,
   UpdateBoardPayload,
@@ -35,6 +36,13 @@ export const boardApi = {
   getById: async (id: string): Promise<Board> => {
     const res = await fetch(`${API_URL}/${encodeURIComponent(id)}`);
     return handleResponse<Board>(res);
+  },
+
+  getPendingInvites: async (userId: string): Promise<BoardInvitation[]> => {
+    const res = await fetch(
+      `${API_URL}/invitations/pending?userId=${encodeURIComponent(userId)}`,
+    );
+    return handleResponse<BoardInvitation[]>(res);
   },
 
   create: async (data: CreateBoardPayload): Promise<Board> => {
@@ -98,6 +106,22 @@ export const boardApi = {
       `${API_URL}/${encodeURIComponent(boardId)}/members/${encodeURIComponent(userId)}`,
       {
         method: "DELETE",
+      },
+    );
+    return handleResponse<void>(res);
+  },
+
+  respondToInvite: async (
+    boardId: string,
+    userId: string,
+    accept: boolean,
+  ): Promise<void> => {
+    const res = await fetch(
+      `${API_URL}/${encodeURIComponent(boardId)}/invitations/respond`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, accept }),
       },
     );
     return handleResponse<void>(res);

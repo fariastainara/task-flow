@@ -170,6 +170,8 @@ interface Props {
   requestCreateOpen?: boolean;
   onRequestCreateClose?: () => void;
   loadingBoards?: boolean;
+  pendingInvitesCount?: number;
+  onOpenInvites?: () => void;
 }
 
 export default function BoardSelector({
@@ -184,6 +186,8 @@ export default function BoardSelector({
   requestCreateOpen,
   onRequestCreateClose,
   loadingBoards,
+  pendingInvitesCount,
+  onOpenInvites,
 }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -323,6 +327,48 @@ export default function BoardSelector({
       </Box>
 
       <List sx={{ flex: 1, overflow: "auto", px: collapsed ? 0.5 : 1 }}>
+        {!collapsed && (pendingInvitesCount || 0) > 0 && (
+          <Box
+            sx={{
+              mx: 1,
+              mb: 1.5,
+              p: 1.5,
+              borderRadius: 1,
+              bgcolor: "#fff3e0",
+              border: "1px solid #ffb74d",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 0.5,
+              }}
+            >
+              <Typography fontSize={13} fontWeight={600}>
+                Convites pendentes
+              </Typography>
+              <Tooltip title="Ver convites">
+                <IconButton
+                  size="small"
+                  onClick={onOpenInvites}
+                  sx={{
+                    color: "black",
+                    "&:hover": { bgcolor: "#e3f2fd" },
+                  }}
+                >
+                  <ChevronRightIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Typography fontSize={12} color="text.secondary">
+              Você tem {pendingInvitesCount}{" "}
+              {pendingInvitesCount === 1 ? "convite" : "convites"} aguardando
+              resposta.
+            </Typography>
+          </Box>
+        )}
         {loadingBoards && !collapsed && (
           <Box
             sx={{
@@ -456,7 +502,7 @@ export default function BoardSelector({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            pr: 4,
+            pr: 2,
           }}
         >
           {editingBoardId ? "Editar quadro" : "Novo quadro"}

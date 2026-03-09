@@ -9,6 +9,7 @@ export interface BoardMember {
   name: string;
   email: string;
   avatar?: string;
+  status?: "PENDING" | "ACCEPTED" | "DECLINED";
 }
 
 export interface Board {
@@ -20,6 +21,16 @@ export interface Board {
   members: BoardMember[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BoardInvitation {
+  boardId: string;
+  boardName: string;
+  boardIcon: string;
+  boardIconColor: string;
+  boardBgColor: string;
+  invitedAt: string;
+  inviterName: string;
 }
 
 export interface CreateBoardPayload {

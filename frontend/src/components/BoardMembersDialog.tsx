@@ -21,11 +21,12 @@ import {
   ListItemText,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
+import { BoardMember } from "../types";
 
 interface Props {
   open: boolean;
   boardName: string;
-  members: { userId: string; name: string; email: string; avatar?: string }[];
+  members: BoardMember[];
   onClose: () => void;
   onInvite: (email: string) => Promise<void>;
   onRemoveMember: (userId: string) => Promise<void>;
@@ -88,7 +89,7 @@ export default function BoardMembersDialog({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          pr: 4,
+          pr: 2,
         }}
       >
         Membros
@@ -190,9 +191,29 @@ export default function BoardMembersDialog({
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={member.name}
+                    primary={
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Typography fontSize={14} fontWeight={500}>
+                          {member.name}
+                        </Typography>
+                        {member.status === "PENDING" && (
+                          <Chip
+                            label="Pendente"
+                            size="small"
+                            sx={{
+                              height: 20,
+                              fontSize: 11,
+                              bgcolor: "#fff3e0",
+                              color: "#e65100",
+                              fontWeight: 600,
+                            }}
+                          />
+                        )}
+                      </Box>
+                    }
                     secondary={member.email}
-                    primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
                     secondaryTypographyProps={{ fontSize: 12 }}
                   />
                 </ListItem>

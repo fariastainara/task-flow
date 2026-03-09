@@ -3,8 +3,9 @@ import {
   NotFoundException,
   ConflictException,
   Inject,
+  BadRequestException,
 } from "@nestjs/common";
-import { Board, BoardMember } from "./board.entity";
+import { Board, BoardInvitation, BoardMember } from "./board.entity";
 import { CreateBoardDto, UpdateBoardDto } from "./dto/board.dto";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabase/supabase.module";
@@ -22,6 +23,7 @@ export class BoardsService {
     const { data: memberRows, error: memberError } = await this.supabase
       .from("board_members")
       .select("board_id")
+      .or("status.eq.ACCEPTED,status.is.null")
       .eq("user_id", userId);
 
     if (memberError) throw memberError;
@@ -96,6 +98,7 @@ export class BoardsService {
     await this.supabase.from("board_members").insert({
       board_id: b.id,
       user_id: dto.userId,
+      status: "ACCEPTED",
     });
 
     const members = await this.getMembers(b.id);
@@ -178,21 +181,38 @@ export class BoardsService {
     // Verifica se já é membro
     const { data: existing } = await this.supabase
       .from("board_members")
-      .select("id")
+      .select("id, status")
       .eq("board_id", boardId)
       .eq("user_id", user.id)
       .single();
 
     if (existing) {
-      throw new ConflictException("Este usuário já é membro do quadro");
+      if (!existing.status || existing.status === "ACCEPTED") {
+        throw new ConflictException("Este usuário já é membro do quadro");
+      }
+
+      if (existing.status === "PENDING") {
+        throw new ConflictException("Este usuário já possui convite pendente");
+      }
+
+      const { error: updateInviteError } = await this.supabase
+        .from("board_members")
+        .update({
+          status: "PENDING",
+          created_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+
+      if (updateInviteError) throw updateInviteError;
+    } else {
+      const { error } = await this.supabase.from("board_members").insert({
+        board_id: boardId,
+        user_id: user.id,
+        status: "PENDING",
+      });
+
+      if (error) throw error;
     }
-
-    const { error } = await this.supabase.from("board_members").insert({
-      board_id: boardId,
-      user_id: user.id,
-    });
-
-    if (error) throw error;
 
     // Atualiza updated_at do board
     await this.supabase
@@ -247,6 +267,7 @@ export class BoardsService {
     await this.supabase.from("board_members").insert({
       board_id: b.id,
       user_id: userId,
+      status: "ACCEPTED",
     });
 
     // Copia as tarefas do quadro original
@@ -279,7 +300,8 @@ export class BoardsService {
   async getMembers(boardId: string): Promise<BoardMember[]> {
     const { data, error } = await this.supabase
       .from("board_members")
-      .select("user_id, users(id, name, email, avatar)")
+      .select("user_id, status, users(id, name, email, avatar)")
+      .or("status.eq.ACCEPTED,status.eq.PENDING,status.is.null")
       .eq("board_id", boardId);
 
     if (error) throw error;
@@ -289,6 +311,91 @@ export class BoardsService {
       name: row.users.name,
       email: row.users.email,
       avatar: row.users.avatar,
+      status: row.status || "ACCEPTED",
     }));
+  }
+
+  async getPendingInvites(userId: string): Promise<BoardInvitation[]> {
+    const { data, error } = await this.supabase
+      .from("board_members")
+      .select(
+        "board_id, created_at, boards(id, name, icon, icon_color, bg_color)",
+      )
+      .eq("user_id", userId)
+      .eq("status", "PENDING")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    const invitesWithInviters = await Promise.all(
+      (data || [])
+        .filter((row: any) => !!row.boards)
+        .map(async (row: any) => {
+          // Busca o primeiro membro aceito do board (owner)
+          const { data: ownerData } = await this.supabase
+            .from("board_members")
+            .select("user_id, users(name)")
+            .eq("board_id", row.boards.id)
+            .or("status.eq.ACCEPTED,status.is.null")
+            .order("created_at", { ascending: true })
+            .limit(1);
+
+          const ownerName = (ownerData?.[0] as any)?.users?.name || "";
+
+          return {
+            boardId: row.boards.id,
+            boardName: row.boards.name,
+            boardIcon: row.boards.icon,
+            boardIconColor: row.boards.icon_color,
+            boardBgColor: row.boards.bg_color,
+            invitedAt: new Date(row.created_at),
+            inviterName: ownerName,
+          };
+        }),
+    );
+
+    return invitesWithInviters;
+  }
+
+  async respondToInvite(
+    boardId: string,
+    userId: string,
+    accept: boolean,
+  ): Promise<void> {
+    const { data: invite, error } = await this.supabase
+      .from("board_members")
+      .select("id, status")
+      .eq("board_id", boardId)
+      .eq("user_id", userId)
+      .single();
+
+    if (error || !invite) {
+      throw new NotFoundException("Convite não encontrado");
+    }
+
+    if (invite.status !== "PENDING") {
+      throw new BadRequestException("Este convite já foi respondido");
+    }
+
+    if (accept) {
+      const { error: updateError } = await this.supabase
+        .from("board_members")
+        .update({ status: "ACCEPTED" })
+        .eq("id", invite.id);
+
+      if (updateError) throw updateError;
+    } else {
+      const { error: updateError } = await this.supabase
+        .from("board_members")
+        .update({ status: "DECLINED" })
+        .eq("id", invite.id);
+
+      if (updateError) throw updateError;
+    }
+
+    await this.supabase
+      .from("boards")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("id", boardId);
   }
 }
