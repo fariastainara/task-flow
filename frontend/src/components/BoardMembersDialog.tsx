@@ -99,7 +99,7 @@ export default function BoardMembersDialog({
       </DialogTitle>
       <DialogContent dividers>
         <Alert severity="info" sx={{ mb: 2 }}>
-          Você pode adicionar apenas pessoas já cadastradas na plataforma.
+          Você só pode adicionar pessoas já cadastradas na plataforma.
         </Alert>
         <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
           Convidar membros para o quadro "{boardName}":
