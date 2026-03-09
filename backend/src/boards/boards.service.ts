@@ -22,7 +22,7 @@ export class BoardsService {
     // Busca os board_ids onde o usuário é membro
     const { data: memberRows, error: memberError } = await this.supabase
       .from("board_members")
-      .select("board_id")
+      .select("board_id, sort_order, created_at")
       .or("status.eq.ACCEPTED,status.is.null")
       .eq("user_id", userId);
 
@@ -34,13 +34,30 @@ export class BoardsService {
     const { data: boards, error } = await this.supabase
       .from("boards")
       .select("*")
-      .in("id", boardIds)
-      .order("created_at", { ascending: true });
+      .in("id", boardIds);
 
     if (error) throw error;
 
+    const sortMap = new Map<string, number | null>();
+    for (const row of memberRows || []) {
+      sortMap.set(row.board_id, row.sort_order ?? null);
+    }
+
+    const sortedBoards = (boards || []).slice().sort((a: any, b: any) => {
+      const aOrder = sortMap.get(a.id);
+      const bOrder = sortMap.get(b.id);
+      if (aOrder == null && bOrder == null) {
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
+      if (aOrder == null) return 1;
+      if (bOrder == null) return -1;
+      return aOrder - bOrder;
+    });
+
     const result: Board[] = [];
-    for (const b of boards || []) {
+    for (const b of sortedBoards) {
       const members = await this.getMembers(b.id);
       result.push({
         id: b.id,
@@ -54,6 +71,20 @@ export class BoardsService {
       });
     }
     return result;
+  }
+
+  private async getNextSortOrder(userId: string): Promise<number> {
+    const { data } = await this.supabase
+      .from("board_members")
+      .select("sort_order")
+      .eq("user_id", userId)
+      .or("status.eq.ACCEPTED,status.is.null")
+      .not("sort_order", "is", null)
+      .order("sort_order", { ascending: false })
+      .limit(1);
+
+    const maxOrder = data?.[0]?.sort_order;
+    return typeof maxOrder === "number" ? maxOrder + 1 : 1;
   }
 
   async findOne(id: string): Promise<Board> {
@@ -95,10 +126,12 @@ export class BoardsService {
     if (error) throw error;
 
     // Adiciona o criador como membro automaticamente
+    const sortOrder = await this.getNextSortOrder(dto.userId);
     await this.supabase.from("board_members").insert({
       board_id: b.id,
       user_id: dto.userId,
       status: "ACCEPTED",
+      sort_order: sortOrder,
     });
 
     const members = await this.getMembers(b.id);
@@ -264,10 +297,12 @@ export class BoardsService {
     if (error) throw error;
 
     // Adiciona o usuário como membro
+    const sortOrder = await this.getNextSortOrder(userId);
     await this.supabase.from("board_members").insert({
       board_id: b.id,
       user_id: userId,
       status: "ACCEPTED",
+      sort_order: sortOrder,
     });
 
     // Copia as tarefas do quadro original
@@ -380,9 +415,10 @@ export class BoardsService {
     }
 
     if (accept) {
+      const sortOrder = await this.getNextSortOrder(userId);
       const { error: updateError } = await this.supabase
         .from("board_members")
-        .update({ status: "ACCEPTED" })
+        .update({ status: "ACCEPTED", sort_order: sortOrder })
         .eq("id", invite.id);
 
       if (updateError) throw updateError;
@@ -399,5 +435,40 @@ export class BoardsService {
       .from("boards")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", boardId);
+  }
+
+  async reorderBoards(userId: string, boardIds: string[]): Promise<void> {
+    if (!userId || !Array.isArray(boardIds) || boardIds.length === 0) {
+      throw new BadRequestException("Parâmetros inválidos");
+    }
+
+    const uniqueIds = Array.from(new Set(boardIds));
+    if (uniqueIds.length !== boardIds.length) {
+      throw new BadRequestException("Lista de quadros contém duplicados");
+    }
+
+    const { data: memberships, error } = await this.supabase
+      .from("board_members")
+      .select("board_id")
+      .eq("user_id", userId)
+      .or("status.eq.ACCEPTED,status.is.null")
+      .in("board_id", boardIds);
+
+    if (error) throw error;
+
+    if ((memberships || []).length !== boardIds.length) {
+      throw new BadRequestException("Quadros inválidos para este usuário");
+    }
+
+    for (let index = 0; index < boardIds.length; index += 1) {
+      const boardId = boardIds[index];
+      const { error: updateError } = await this.supabase
+        .from("board_members")
+        .update({ sort_order: index + 1 })
+        .eq("user_id", userId)
+        .eq("board_id", boardId);
+
+      if (updateError) throw updateError;
+    }
   }
 }

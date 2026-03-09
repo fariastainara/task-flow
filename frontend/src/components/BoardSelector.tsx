@@ -165,6 +165,7 @@ interface Props {
   ) => Promise<void> | void;
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
+  onReorder: (boardIds: string[]) => Promise<void> | void;
   onOpenMembers: (boardId: string) => void;
   onLogout: () => void;
   requestCreateOpen?: boolean;
@@ -182,6 +183,7 @@ export default function BoardSelector({
   onRename,
   onDelete,
   onDuplicate,
+  onReorder,
   onLogout,
   requestCreateOpen,
   onRequestCreateClose,
@@ -208,6 +210,17 @@ export default function BoardSelector({
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
   const [hoveredBoardId, setHoveredBoardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [draggingBoardId, setDraggingBoardId] = useState<string | null>(null);
+  const [dragOverBoardId, setDragOverBoardId] = useState<string | null>(null);
+  const [dragOverPosition, setDragOverPosition] = useState<
+    "before" | "after" | null
+  >(null);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "";
+    };
+  }, []);
 
   useEffect(() => {
     if (requestCreateOpen) {
@@ -276,6 +289,57 @@ export default function BoardSelector({
     setInviteInput("");
     setCreateOpen(true);
   };
+
+  const handleDragStart =
+    (boardId: string) => (e: React.DragEvent<HTMLDivElement>) => {
+      setDraggingBoardId(boardId);
+      setDragOverBoardId(null);
+      setDragOverPosition(null);
+      document.body.style.cursor = "grabbing";
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", boardId);
+    };
+
+  const handleDragOver =
+    (targetId: string) => (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+
+      if (!draggingBoardId || draggingBoardId === targetId) return;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const isAfter = e.clientY - rect.top > rect.height / 2;
+      setDragOverBoardId(targetId);
+      setDragOverPosition(isAfter ? "after" : "before");
+    };
+
+  const handleDrop =
+    (targetId: string) => (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const sourceId = draggingBoardId || e.dataTransfer.getData("text/plain");
+      if (!sourceId || sourceId === targetId) return;
+
+      const ids = boards.map((b) => b.id);
+      const fromIndex = ids.indexOf(sourceId);
+      const toIndex = ids.indexOf(targetId);
+      if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+
+      const nextIds = ids.slice();
+      const [moved] = nextIds.splice(fromIndex, 1);
+      const insertIndex =
+        dragOverPosition === "after"
+          ? toIndex + (fromIndex < toIndex ? 0 : 1)
+          : toIndex + (fromIndex < toIndex ? -1 : 0);
+
+      const safeIndex = Math.max(0, Math.min(nextIds.length, insertIndex));
+      nextIds.splice(safeIndex, 0, moved);
+
+      onReorder(nextIds);
+      setDraggingBoardId(null);
+      setDragOverBoardId(null);
+      setDragOverPosition(null);
+      document.body.style.cursor = "";
+    };
 
   return (
     <Paper
@@ -406,19 +470,55 @@ export default function BoardSelector({
         {boards.map((board) => (
           <ListItemButton
             key={board.id}
+            draggable
             selected={board.id === selectedBoardId}
             onClick={() => onSelect(board.id)}
             onMouseEnter={() => setHoveredBoardId(board.id)}
             onMouseLeave={() => setHoveredBoardId(null)}
+            onDragStart={handleDragStart(board.id)}
+            onDragOver={handleDragOver(board.id)}
+            onDrop={handleDrop(board.id)}
+            onDragEnd={() => {
+              setDraggingBoardId(null);
+              setDragOverBoardId(null);
+              setDragOverPosition(null);
+              document.body.style.cursor = "";
+            }}
             sx={{
               borderRadius: 1,
               mb: 0.5,
+              transition: "background-color 0.15s ease",
+              cursor: draggingBoardId === board.id ? "grabbing" : "grab",
+              "& *": {
+                cursor: "inherit",
+              },
+              "& *:hover": {
+                cursor: "inherit",
+              },
+              "&:active": {
+                cursor: "grabbing",
+              },
+              opacity:
+                draggingBoardId === board.id && dragOverBoardId !== board.id
+                  ? 0.6
+                  : 1,
+              bgcolor: dragOverBoardId === board.id ? "#f5f5f5" : "transparent",
               pr: collapsed ? 1 : hoveredBoardId === board.id ? 11 : 1,
+              boxShadow:
+                dragOverBoardId === board.id && dragOverPosition === "before"
+                  ? "inset 0 2px 0 #1976d2"
+                  : dragOverBoardId === board.id && dragOverPosition === "after"
+                    ? "inset 0 -2px 0 #1976d2"
+                    : "none",
               "& .board-actions": {
                 opacity: 0,
                 transition: "opacity 0.2s",
                 position: "absolute",
                 right: 8,
+                cursor: "pointer",
+              },
+              "& .board-actions *": {
+                cursor: "pointer",
               },
               "&:hover .board-actions": { opacity: 1 },
               "&.Mui-selected": {

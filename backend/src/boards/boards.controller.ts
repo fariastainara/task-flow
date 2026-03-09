@@ -12,6 +12,7 @@ import { BoardsService } from "./boards.service";
 import { CreateBoardDto, UpdateBoardDto } from "./dto/board.dto";
 import { InviteMemberDto } from "./dto/invite-member.dto";
 import { RespondInviteDto } from "./dto/respond-invite.dto";
+import { ReorderBoardsDto } from "./dto/reorder-boards.dto";
 import { Board, BoardInvitation, BoardMember } from "./board.entity";
 
 @Controller("boards")
@@ -82,6 +83,11 @@ export class BoardsController {
     @Body() dto: RespondInviteDto,
   ): Promise<void> {
     return this.boardsService.respondToInvite(id, dto.userId, dto.accept);
+  }
+
+  @Post("reorder")
+  async reorderBoards(@Body() dto: ReorderBoardsDto): Promise<void> {
+    return this.boardsService.reorderBoards(dto.userId, dto.boardIds);
   }
 
   @Delete(":id/members/:userId")

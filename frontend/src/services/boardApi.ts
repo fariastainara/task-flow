@@ -126,4 +126,13 @@ export const boardApi = {
     );
     return handleResponse<void>(res);
   },
+
+  reorder: async (userId: string, boardIds: string[]): Promise<void> => {
+    const res = await fetch(`${API_URL}/reorder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, boardIds }),
+    });
+    return handleResponse<void>(res);
+  },
 };

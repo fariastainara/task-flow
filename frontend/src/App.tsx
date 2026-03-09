@@ -262,6 +262,27 @@ export default function App() {
     }
   };
 
+  const handleReorderBoards = async (boardIds: string[]) => {
+    if (!user?.id) return;
+    const boardMap = new Map(boards.map((b) => [b.id, b]));
+    const next = boardIds
+      .map((id) => boardMap.get(id))
+      .filter(Boolean) as Board[];
+
+    if (next.length !== boards.length) return;
+
+    const prev = boards;
+    setBoards(next);
+    try {
+      await boardApi.reorder(user.id, boardIds);
+    } catch (err) {
+      setBoards(prev);
+      setError(
+        err instanceof Error ? err.message : "Erro ao reordenar quadros",
+      );
+    }
+  };
+
   const handleInviteMember = async (email: string) => {
     if (!selectedBoardId) return;
     await boardApi.inviteMember(selectedBoardId, email);
@@ -510,6 +531,7 @@ export default function App() {
               onRename={handleRenameBoard}
               onDelete={handleDeleteBoard}
               onDuplicate={handleDuplicateBoard}
+              onReorder={handleReorderBoards}
               onOpenMembers={handleOpenMembers}
               onLogout={logout}
               requestCreateOpen={requestCreateBoard}
@@ -528,6 +550,7 @@ export default function App() {
             onRename={handleRenameBoard}
             onDelete={handleDeleteBoard}
             onDuplicate={handleDuplicateBoard}
+            onReorder={handleReorderBoards}
             onOpenMembers={handleOpenMembers}
             onLogout={logout}
             requestCreateOpen={requestCreateBoard}

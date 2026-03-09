@@ -34,12 +34,16 @@ CREATE TABLE IF NOT EXISTS board_members (
   board_id UUID NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'ACCEPTED' CHECK (status IN ('PENDING', 'ACCEPTED', 'DECLINED')),
+  sort_order INTEGER,
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(board_id, user_id)
 );
 
 ALTER TABLE board_members
   ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACCEPTED';
+
+ALTER TABLE board_members
+  ADD COLUMN IF NOT EXISTS sort_order INTEGER;
 
 UPDATE board_members
 SET status = 'ACCEPTED'
@@ -69,6 +73,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_board_id ON tasks(board_id);
 CREATE INDEX IF NOT EXISTS idx_board_members_board_id ON board_members(board_id);
 CREATE INDEX IF NOT EXISTS idx_board_members_user_id ON board_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_board_members_user_sort ON board_members(user_id, sort_order);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Usuário admin padrão (senha: admin123)
