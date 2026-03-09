@@ -70,6 +70,7 @@ export default function App() {
   const [requestCreateBoard, setRequestCreateBoard] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [members, setMembers] = useState<BoardMember[]>([]);
+  const [showAllMembers, setShowAllMembers] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<BoardInvitation[]>([]);
   const [respondingInviteId, setRespondingInviteId] = useState<string | null>(
     null,
@@ -78,6 +79,10 @@ export default function App() {
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [filterByUserId, setFilterByUserId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setShowAllMembers(false);
+  }, [selectedBoardId, members.length]);
 
   const loadBoards = useCallback(async () => {
     if (boards.length === 0) {
@@ -577,7 +582,19 @@ export default function App() {
                   </Typography>
                   {members.length > 0 && (
                     <AvatarGroup
-                      max={5}
+                      max={showAllMembers ? members.length : 5}
+                      renderSurplus={(surplus) => (
+                        <Avatar
+                          onClick={() => setShowAllMembers(true)}
+                          sx={{
+                            cursor: "pointer",
+                            bgcolor: "#e0e0e0",
+                            color: "text.primary",
+                          }}
+                        >
+                          +{surplus}
+                        </Avatar>
+                      )}
                       sx={{
                         "& .MuiAvatar-root": {
                           width: 32,
