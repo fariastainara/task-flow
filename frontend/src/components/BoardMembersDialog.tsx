@@ -211,6 +211,19 @@ export default function BoardMembersDialog({
                             }}
                           />
                         )}
+                        {member.status === "DECLINED" && (
+                          <Chip
+                            label="Convite recusado"
+                            size="small"
+                            sx={{
+                              height: 20,
+                              fontSize: 11,
+                              bgcolor: "#ffebee",
+                              color: "#c62828",
+                              fontWeight: 600,
+                            }}
+                          />
+                        )}
                       </Box>
                     }
                     secondary={member.email}

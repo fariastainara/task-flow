@@ -86,7 +86,17 @@ export default function App() {
     try {
       const data = await boardApi.getAll(user?.id);
       setBoards(data);
-      if (data.length > 0 && !selectedBoardId) {
+
+      if (data.length === 0) {
+        setSelectedBoardId(null);
+        setTasks([]);
+        setMembers([]);
+        return;
+      }
+
+      const hasSelectedBoard =
+        !!selectedBoardId && data.some((b) => b.id === selectedBoardId);
+      if (!hasSelectedBoard) {
         setSelectedBoardId(data[0].id);
       }
     } catch (err) {
@@ -94,7 +104,7 @@ export default function App() {
     } finally {
       setLoadingBoards(false);
     }
-  }, [selectedBoardId, user?.id]);
+  }, [boards.length, selectedBoardId, user?.id]);
 
   const loadTasks = useCallback(async () => {
     if (!selectedBoardId) {
@@ -532,7 +542,7 @@ export default function App() {
               selectedBoard?.bgColor || (selectedBoardId ? "#f5f5f5" : "white"),
           }}
         >
-          {selectedBoardId ? (
+          {selectedBoard ? (
             <Box
               sx={{
                 py: isMobile ? 2 : 3,
@@ -563,7 +573,7 @@ export default function App() {
                     fontWeight={400}
                     color="text.primary"
                   >
-                    {boards.find((b) => b.id === selectedBoardId)?.name}
+                    {selectedBoard.name}
                   </Typography>
                   {members.length > 0 && (
                     <AvatarGroup
@@ -620,7 +630,7 @@ export default function App() {
                   <Button
                     variant="outlined"
                     startIcon={isMobile ? undefined : <GroupIcon />}
-                    onClick={() => handleOpenMembers(selectedBoardId)}
+                    onClick={() => handleOpenMembers(selectedBoard.id)}
                     sx={{
                       color: "black",
                       borderColor: "#ccc",
@@ -762,20 +772,20 @@ export default function App() {
         </Box>
       </Box>
 
-      {selectedBoardId && (
+      {selectedBoard && (
         <TaskForm
           open={createOpen}
-          boardId={selectedBoardId}
+          boardId={selectedBoard.id}
           members={members}
           onClose={() => setCreateOpen(false)}
           onSubmit={handleCreate}
         />
       )}
 
-      {selectedBoardId && (
+      {selectedBoard && (
         <TaskForm
           open={!!editTask}
-          boardId={selectedBoardId}
+          boardId={selectedBoard.id}
           members={members}
           task={editTask}
           onClose={() => setEditTask(null)}

@@ -206,6 +206,7 @@ export default function BoardSelector({
   const [inviteEmails, setInviteEmails] = useState<string[]>([]);
   const [inviteInput, setInviteInput] = useState("");
   const [editingBoardId, setEditingBoardId] = useState<string | null>(null);
+  const [hoveredBoardId, setHoveredBoardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -407,9 +408,12 @@ export default function BoardSelector({
             key={board.id}
             selected={board.id === selectedBoardId}
             onClick={() => onSelect(board.id)}
+            onMouseEnter={() => setHoveredBoardId(board.id)}
+            onMouseLeave={() => setHoveredBoardId(null)}
             sx={{
               borderRadius: 1,
               mb: 0.5,
+              pr: collapsed ? 1 : hoveredBoardId === board.id ? 11 : 1,
               "& .board-actions": {
                 opacity: 0,
                 transition: "opacity 0.2s",
@@ -442,8 +446,12 @@ export default function BoardSelector({
                   fontSize: 14,
                   fontWeight: 500,
                   color: "text.primary",
+                  sx: {
+                    textOverflow:
+                      hoveredBoardId === board.id ? "ellipsis" : "clip",
+                  },
                 }}
-                sx={{ ml: 0.5 }}
+                sx={{ ml: 0.5, minWidth: 0 }}
               />
             )}
             {!collapsed && (

@@ -70,7 +70,7 @@ export default function PendingInvitesDialog({
                   primary={invite.boardName}
                   secondary={
                     invite.inviterName
-                      ? `Convidado por ${invite.inviterName}`
+                      ? `Criado por ${invite.inviterName}`
                       : ""
                   }
                   primaryTypographyProps={{ fontWeight: 600, fontSize: 15 }}

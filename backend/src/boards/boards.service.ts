@@ -301,7 +301,9 @@ export class BoardsService {
     const { data, error } = await this.supabase
       .from("board_members")
       .select("user_id, status, users(id, name, email, avatar)")
-      .or("status.eq.ACCEPTED,status.eq.PENDING,status.is.null")
+      .or(
+        "status.eq.ACCEPTED,status.eq.PENDING,status.eq.DECLINED,status.is.null",
+      )
       .eq("board_id", boardId);
 
     if (error) throw error;
