@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -57,6 +58,8 @@ export default function TaskCard({
   onDuplicate,
 }: Props) {
   const isMobile = useMediaQuery("(max-width:768px)");
+  const [isHovered, setIsHovered] = useState(false);
+
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData("text/plain", task.id);
     e.dataTransfer.effectAllowed = "move";
@@ -64,6 +67,8 @@ export default function TaskCard({
 
   return (
     <Card
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
         mb: 1.5,
         cursor: "grab",
@@ -96,12 +101,29 @@ export default function TaskCard({
               <Typography
                 variant="body1"
                 fontWeight={600}
-                noWrap
-                sx={{ flex: 1 }}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: isHovered ? 1 : 2,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "normal",
+                }}
               >
                 {task.title}
               </Typography>
-              <Box className="card-actions" sx={{ display: "flex", ml: 1 }}>
+              <Box
+                className="card-actions"
+                sx={{
+                  display: "flex",
+                  ml: isHovered ? 1 : 0,
+                  width: isHovered ? "auto" : 0,
+                  overflow: "hidden",
+                  transition: "width 0.2s",
+                }}
+              >
                 <Tooltip title="Editar">
                   <IconButton size="small" onClick={() => onEdit(task)}>
                     <EditIcon sx={{ fontSize: 16 }} />
