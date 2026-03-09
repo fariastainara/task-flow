@@ -16,7 +16,7 @@ import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutlineOutlined";
-import { Task, TaskStatus } from "../types";
+import { Task, TaskStatus, TaskPriority } from "../types";
 import { AccessTimeOutlined, TimelapseOutlined } from "@mui/icons-material";
 
 function formatDate(dateStr: string): string {
@@ -31,6 +31,32 @@ function isOverdue(task: Task): boolean {
   const due = new Date(task.dueDate + "T00:00:00");
   return due < today;
 }
+
+const priorityConfig: Record<
+  TaskPriority,
+  { label: string; color: string; bgColor: string }
+> = {
+  [TaskPriority.LOW]: {
+    label: "Baixa",
+    color: "#027A48",
+    bgColor: "#ECFDF3",
+  },
+  [TaskPriority.MEDIUM]: {
+    label: "Média",
+    color: "#B54708",
+    bgColor: "#FFFAEB",
+  },
+  [TaskPriority.HIGH]: {
+    label: "Alta",
+    color: "#B42318",
+    bgColor: "#FEF3F2",
+  },
+  [TaskPriority.URGENT]: {
+    label: "Urgente",
+    color: "#ffffff",
+    bgColor: "#B42318",
+  },
+};
 
 interface Props {
   task: Task;
@@ -154,6 +180,19 @@ export default function TaskCard({
                 {task.description}
               </Typography>
             )}
+            <Box display="flex" gap={0.5} mt={0.5}>
+              <Chip
+                label={priorityConfig[task.priority].label}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  bgcolor: priorityConfig[task.priority].bgColor,
+                  color: priorityConfig[task.priority].color,
+                }}
+              />
+            </Box>
           </Box>
         </Box>
         {(task.assigneeName ||

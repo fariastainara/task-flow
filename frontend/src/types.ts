@@ -4,6 +4,13 @@ export enum TaskStatus {
   DONE = "DONE",
 }
 
+export enum TaskPriority {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
+}
+
 export interface BoardMember {
   userId: string;
   name: string;
@@ -54,6 +61,7 @@ export interface Task {
   title: string;
   description: string;
   status: TaskStatus;
+  priority: TaskPriority;
   assigneeId?: string;
   assigneeName?: string;
   startDate?: string;
@@ -66,6 +74,7 @@ export interface CreateTaskPayload {
   boardId: string;
   title: string;
   description?: string;
+  priority?: TaskPriority;
   assigneeId?: string;
   assigneeName?: string;
   startDate?: string;
@@ -76,6 +85,7 @@ export interface UpdateTaskPayload {
   title?: string;
   description?: string;
   status?: TaskStatus;
+  priority?: TaskPriority;
   assigneeId?: string;
   assigneeName?: string;
   startDate?: string;

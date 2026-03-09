@@ -20,6 +20,7 @@ import {
   UpdateTaskPayload,
   Task,
   TaskStatus,
+  TaskPriority,
   BoardMember,
 } from "../types";
 import { useAuth } from "../contexts/AuthContext";
@@ -28,6 +29,13 @@ const statusLabels: Record<TaskStatus, string> = {
   [TaskStatus.TODO]: "Não iniciado",
   [TaskStatus.IN_PROGRESS]: "Em andamento",
   [TaskStatus.DONE]: "Concluído",
+};
+
+const priorityLabels: Record<TaskPriority, string> = {
+  [TaskPriority.LOW]: "Baixa",
+  [TaskPriority.MEDIUM]: "Média",
+  [TaskPriority.HIGH]: "Alta",
+  [TaskPriority.URGENT]: "Urgente",
 };
 
 interface Props {
@@ -55,6 +63,7 @@ export default function TaskForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
+  const [priority, setPriority] = useState<TaskPriority>(TaskPriority.MEDIUM);
   const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [assigneeId, setAssigneeId] = useState(user?.id || "");
@@ -65,6 +74,7 @@ export default function TaskForm({
       setTitle(task.title);
       setDescription(task.description);
       setStatus(task.status);
+      setPriority(task.priority);
       setStartDate(task.startDate ?? "");
       setDueDate(task.dueDate ?? "");
       setAssigneeId(task.assigneeId ?? "");
@@ -77,6 +87,7 @@ export default function TaskForm({
     setTitle("");
     setDescription("");
     setStatus(TaskStatus.TODO);
+    setPriority(TaskPriority.MEDIUM);
     setStartDate("");
     setDueDate("");
     setAssigneeId(user?.id || "");
@@ -92,6 +103,7 @@ export default function TaskForm({
           title: title.trim(),
           description: description.trim(),
           status,
+          priority,
           assigneeId: assigneeId || undefined,
           assigneeName: assigneeId ? assignee?.name : undefined,
           startDate: startDate || undefined,
@@ -102,6 +114,7 @@ export default function TaskForm({
           boardId,
           title: title.trim(),
           description: description.trim(),
+          priority,
           assigneeId: assigneeId || undefined,
           assigneeName: assignee?.name,
           startDate: startDate || undefined,
@@ -190,6 +203,21 @@ export default function TaskForm({
                 {members.map((m) => (
                   <MenuItem key={m.userId} value={m.userId}>
                     {m.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel shrink>Prioridade</InputLabel>
+              <Select
+                value={priority}
+                label="Prioridade"
+                onChange={(e) => setPriority(e.target.value as TaskPriority)}
+                notched
+              >
+                {Object.values(TaskPriority).map((p) => (
+                  <MenuItem key={p} value={p}>
+                    {priorityLabels[p]}
                   </MenuItem>
                 ))}
               </Select>

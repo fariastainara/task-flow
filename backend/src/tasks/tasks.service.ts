@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, Inject } from "@nestjs/common";
-import { Task, TaskStatus } from "./task.entity";
+import { Task, TaskStatus, TaskPriority } from "./task.entity";
 import { CreateTaskDto, UpdateTaskDto } from "./dto/task.dto";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_CLIENT } from "../supabase/supabase.module";
@@ -17,6 +17,7 @@ export class TasksService {
       title: row.title,
       description: row.description,
       status: row.status as TaskStatus,
+      priority: row.priority as TaskPriority,
       assigneeId: row.assignee_id,
       assigneeName: row.assignee_name,
       startDate: row.start_date,
@@ -72,6 +73,7 @@ export class TasksService {
         title: createTaskDto.title,
         description: createTaskDto.description ?? "",
         status: TaskStatus.TODO,
+        priority: createTaskDto.priority ?? TaskPriority.MEDIUM,
         assignee_id: createTaskDto.assigneeId || null,
         assignee_name: createTaskDto.assigneeName || null,
         start_date: createTaskDto.startDate || null,
@@ -95,6 +97,8 @@ export class TasksService {
       updateData.description = updateTaskDto.description;
     if (updateTaskDto.status !== undefined)
       updateData.status = updateTaskDto.status;
+    if (updateTaskDto.priority !== undefined)
+      updateData.priority = updateTaskDto.priority;
     if (updateTaskDto.startDate !== undefined)
       updateData.start_date = updateTaskDto.startDate;
     if (updateTaskDto.dueDate !== undefined)
