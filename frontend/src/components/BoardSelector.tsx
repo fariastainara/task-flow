@@ -148,6 +148,7 @@ const BG_COLOR_OPTIONS = [
 interface Props {
   boards: Board[];
   selectedBoardId: string | null;
+  currentUserId?: string;
   onSelect: (boardId: string) => void;
   onCreate: (
     name: string,
@@ -178,6 +179,7 @@ interface Props {
 export default function BoardSelector({
   boards,
   selectedBoardId,
+  currentUserId,
   onSelect,
   onCreate,
   onRename,
@@ -578,17 +580,26 @@ export default function BoardSelector({
                     <ContentCopyIcon sx={{ fontSize: 16 }} />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Excluir">
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(board.id);
-                    }}
-                  >
-                    <DeleteIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
+                <Tooltip
+                  title={
+                    board.createdBy !== currentUserId
+                      ? "Você não tem permissão de excluir o quadro"
+                      : "Excluir"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      disabled={board.createdBy !== currentUserId}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(board.id);
+                      }}
+                    >
+                      <DeleteIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </Box>
             )}

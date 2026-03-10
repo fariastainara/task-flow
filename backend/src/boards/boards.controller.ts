@@ -60,8 +60,11 @@ export class BoardsController {
   }
 
   @Delete(":id")
-  async remove(@Param("id") id: string): Promise<void> {
-    return this.boardsService.remove(id);
+  async remove(
+    @Param("id") id: string,
+    @Query("userId") userId: string,
+  ): Promise<void> {
+    return this.boardsService.remove(id, userId);
   }
 
   @Get(":id/members")

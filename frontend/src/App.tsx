@@ -240,8 +240,9 @@ export default function App() {
   };
 
   const handleDeleteBoard = async (id: string) => {
+    if (!user?.id) return;
     try {
-      await boardApi.remove(id);
+      await boardApi.remove(id, user.id);
       const remaining = boards.filter((b) => b.id !== id);
       setBoards(remaining);
       if (selectedBoardId === id) {
@@ -523,6 +524,7 @@ export default function App() {
             <BoardSelector
               boards={boards}
               selectedBoardId={selectedBoardId}
+              currentUserId={user?.id}
               onSelect={(id) => {
                 setSelectedBoardId(id);
                 setSidebarOpen(false);
@@ -545,6 +547,7 @@ export default function App() {
           <BoardSelector
             boards={boards}
             selectedBoardId={selectedBoardId}
+            currentUserId={user?.id}
             onSelect={setSelectedBoardId}
             onCreate={handleCreateBoard}
             onRename={handleRenameBoard}
@@ -591,18 +594,32 @@ export default function App() {
                 <Box
                   sx={{
                     display: "flex",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     gap: 2,
                     flexWrap: "wrap",
                   }}
                 >
-                  <Typography
-                    variant="h5"
-                    fontWeight={400}
-                    color="text.primary"
-                  >
-                    {selectedBoard.name}
-                  </Typography>
+                  <Box>
+                    <Typography
+                      variant="h5"
+                      fontWeight={400}
+                      color="text.primary"
+                    >
+                      {selectedBoard.name}
+                    </Typography>
+                    {selectedBoard.createdBy && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", mt: 0.5 }}
+                      >
+                        Criado por{" "}
+                        {members.find(
+                          (m) => m.userId === selectedBoard.createdBy,
+                        )?.name || "Desconhecido"}
+                      </Typography>
+                    )}
+                  </Box>
                   {members.length > 0 && (
                     <AvatarGroup
                       max={showAllMembers ? members.length : 5}
@@ -852,6 +869,8 @@ export default function App() {
           open={membersOpen}
           boardName={selectedBoard.name}
           members={members}
+          createdBy={selectedBoard.createdBy}
+          currentUserId={user?.id}
           onClose={() => setMembersOpen(false)}
           onInvite={handleInviteMember}
           onRemoveMember={handleRemoveMember}

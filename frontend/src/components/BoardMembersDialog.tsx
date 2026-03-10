@@ -19,14 +19,17 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import { Close, PersonRemove, CancelOutlined } from "@mui/icons-material";
 import { BoardMember } from "../types";
 
 interface Props {
   open: boolean;
   boardName: string;
   members: BoardMember[];
+  createdBy?: string;
+  currentUserId?: string;
   onClose: () => void;
   onInvite: (email: string) => Promise<void>;
   onRemoveMember: (userId: string) => Promise<void>;
@@ -36,8 +39,11 @@ export default function BoardMembersDialog({
   open,
   boardName,
   members,
+  createdBy,
+  currentUserId,
   onClose,
   onInvite,
+  onRemoveMember,
 }: Props) {
   const [inviteEmails, setInviteEmails] = useState<string[]>([]);
   const [inviteInput, setInviteInput] = useState("");
@@ -168,69 +174,139 @@ export default function BoardMembersDialog({
               Membros do quadro ({members.length})
             </Typography>
             <List dense disablePadding>
-              {members.map((member) => (
-                <ListItem key={member.userId} disableGutters>
-                  <ListItemAvatar sx={{ minWidth: 40 }}>
-                    <Avatar
-                      src={member.avatar}
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        fontSize: 13,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {!member.avatar &&
-                        member.name
-                          ?.split(" ")
-                          .filter(Boolean)
-                          .map((w) => w[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Typography fontSize={14} fontWeight={500}>
-                          {member.name}
-                        </Typography>
-                        {member.status === "PENDING" && (
-                          <Chip
-                            label="Pendente"
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: 11,
-                              bgcolor: "#fff3e0",
-                              color: "#e65100",
-                              fontWeight: 600,
-                            }}
-                          />
-                        )}
-                        {member.status === "DECLINED" && (
-                          <Chip
-                            label="Convite recusado"
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: 11,
-                              bgcolor: "#ffebee",
-                              color: "#c62828",
-                              fontWeight: 600,
-                            }}
-                          />
-                        )}
-                      </Box>
+              {members.map((member) => {
+                const isCreator = member.userId === createdBy;
+                const isCurrentUser = member.userId === currentUserId;
+                const canRemove = currentUserId === createdBy && !isCreator;
+                const isPending = member.status === "PENDING";
+
+                return (
+                  <ListItem
+                    key={member.userId}
+                    disableGutters
+                    secondaryAction={
+                      canRemove ? (
+                        <Tooltip
+                          title={
+                            isCurrentUser
+                              ? "Você não pode se remover"
+                              : isPending
+                                ? "Cancelar convite"
+                                : "Remover membro"
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              edge="end"
+                              color={isPending ? "default" : "error"}
+                              disabled={isCurrentUser}
+                              onClick={() => {
+                                onRemoveMember(member.userId);
+                              }}
+                              sx={{
+                                border: "1px solid #ccc",
+                                borderRadius: 1,
+                                padding: "4px",
+                                width: 28,
+                                height: 28,
+                                color: isPending ? "black" : undefined,
+                                "&:hover": {
+                                  bgcolor: isPending
+                                    ? "transparent"
+                                    : "#ffebee",
+                                  borderColor: "#999",
+                                },
+                                "&.Mui-disabled": {
+                                  border: "1px solid #e0e0e0",
+                                },
+                              }}
+                            >
+                              {isPending ? (
+                                <CancelOutlined fontSize="small" />
+                              ) : (
+                                <PersonRemove fontSize="small" />
+                              )}
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      ) : isCreator ? (
+                        <Chip
+                          label="Administrador"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: 11,
+                            bgcolor: "#e3f2fd",
+                            color: "#1976d2",
+                            fontWeight: 600,
+                          }}
+                        />
+                      ) : null
                     }
-                    secondary={member.email}
-                    secondaryTypographyProps={{ fontSize: 12 }}
-                  />
-                </ListItem>
-              ))}
+                  >
+                    <ListItemAvatar sx={{ minWidth: 40 }}>
+                      <Avatar
+                        src={member.avatar}
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          fontSize: 13,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {!member.avatar &&
+                          member.name
+                            ?.split(" ")
+                            .filter(Boolean)
+                            .map((w) => w[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <Typography fontSize={14} fontWeight={500}>
+                            {member.name}
+                          </Typography>
+                          {member.status === "PENDING" && (
+                            <Chip
+                              label="Pendente"
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: 11,
+                                bgcolor: "#fff3e0",
+                                color: "#e65100",
+                                fontWeight: 600,
+                              }}
+                            />
+                          )}
+                          {member.status === "DECLINED" && (
+                            <Chip
+                              label="Convite recusado"
+                              size="small"
+                              sx={{
+                                height: 20,
+                                fontSize: 11,
+                                bgcolor: "#ffebee",
+                                color: "#c62828",
+                                fontWeight: 600,
+                              }}
+                            />
+                          )}
+                        </Box>
+                      }
+                      secondary={member.email}
+                      secondaryTypographyProps={{ fontSize: 12 }}
+                    />
+                  </ListItem>
+                );
+              })}
             </List>
           </>
         )}

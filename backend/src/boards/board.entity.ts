@@ -24,6 +24,7 @@ export interface Board {
   icon: string;
   iconColor: string;
   bgColor: string;
+  createdBy: string;
   members: BoardMember[];
   createdAt: Date;
   updatedAt: Date;

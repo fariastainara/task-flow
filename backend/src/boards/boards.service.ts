@@ -65,6 +65,7 @@ export class BoardsService {
         icon: b.icon,
         iconColor: b.icon_color,
         bgColor: b.bg_color,
+        createdBy: b.created_by,
         members,
         createdAt: b.created_at,
         updatedAt: b.updated_at,
@@ -105,6 +106,7 @@ export class BoardsService {
       icon: b.icon,
       iconColor: b.icon_color,
       bgColor: b.bg_color,
+      createdBy: b.created_by,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
@@ -119,6 +121,7 @@ export class BoardsService {
         icon: dto.icon || "Dashboard",
         icon_color: dto.iconColor || "#1976d2",
         bg_color: dto.bgColor || "#f5f5f5",
+        created_by: dto.userId,
       })
       .select("*")
       .single();
@@ -141,6 +144,7 @@ export class BoardsService {
       icon: b.icon,
       iconColor: b.icon_color,
       bgColor: b.bg_color,
+      createdBy: b.created_by,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
@@ -174,13 +178,30 @@ export class BoardsService {
       icon: b.icon,
       iconColor: b.icon_color,
       bgColor: b.bg_color,
+      createdBy: b.created_by,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,
     };
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, userId: string): Promise<void> {
+    // Verifica se o usuário é o criador do quadro
+    const { data: board } = await this.supabase
+      .from("boards")
+      .select("created_by")
+      .eq("id", id)
+      .single();
+
+    if (!board) {
+      throw new NotFoundException(`Quadro com id "${id}" não encontrado`);
+    }
+
+    if (board.created_by !== userId) {
+      throw new BadRequestException(
+        "Apenas o criador do quadro pode excluí-lo",
+      );
+    }
     const { error } = await this.supabase.from("boards").delete().eq("id", id);
 
     if (error) {
@@ -290,6 +311,7 @@ export class BoardsService {
         icon: original.icon,
         icon_color: original.iconColor,
         bg_color: original.bgColor,
+        created_by: userId,
       })
       .select("*")
       .single();
@@ -326,6 +348,7 @@ export class BoardsService {
       icon: b.icon,
       iconColor: b.icon_color,
       bgColor: b.bg_color,
+      createdBy: b.created_by,
       members,
       createdAt: b.created_at,
       updatedAt: b.updated_at,

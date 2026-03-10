@@ -63,10 +63,13 @@ export const boardApi = {
     return handleResponse<Board>(res);
   },
 
-  remove: async (id: string): Promise<void> => {
-    const res = await fetch(`${API_URL}/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
+  remove: async (id: string, userId: string): Promise<void> => {
+    const res = await fetch(
+      `${API_URL}/${encodeURIComponent(id)}?userId=${encodeURIComponent(userId)}`,
+      {
+        method: "DELETE",
+      },
+    );
     return handleResponse<void>(res);
   },
 
