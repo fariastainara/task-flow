@@ -334,6 +334,7 @@ export class BoardsService {
         boardId: b.id,
         title: task.title,
         description: task.description || undefined,
+        priority: task.priority,
         assigneeId: task.assigneeId || undefined,
         assigneeName: task.assigneeName || undefined,
         startDate: task.startDate || undefined,

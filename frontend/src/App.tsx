@@ -23,6 +23,7 @@ import AddIcon from "@mui/icons-material/AddOutlined";
 import GroupIcon from "@mui/icons-material/GroupOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import logoHeader from "./images/logo-header.svg";
 import backgroundEmptyKanban from "./images/background-empty-kanban.svg";
 import {
@@ -349,6 +350,7 @@ export default function App() {
         boardId: task.boardId,
         title: `${task.title} (cópia)`,
         description: task.description || undefined,
+        priority: task.priority,
         assigneeId: task.assigneeId || undefined,
         assigneeName: task.assigneeName || undefined,
         startDate: task.startDate || undefined,
@@ -458,6 +460,19 @@ export default function App() {
                 >
                   <NotificationsNoneOutlinedIcon sx={{ fontSize: 20 }} />
                 </Badge>
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Ajuda">
+              <IconButton
+                onClick={() =>
+                  window.open(
+                    "https://docs.google.com/document/d/1M4MsW2hyS1HhGhil_utfVO51vz6bHqW-ti1usJQg4vk/edit?usp=sharing",
+                    "_blank",
+                  )
+                }
+                size="small"
+              >
+                <HelpOutlineIcon sx={{ fontSize: 20 }} />
               </IconButton>
             </Tooltip>
             <Tooltip title="Editar perfil">
