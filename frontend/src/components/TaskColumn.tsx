@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Box, Typography, Paper, Avatar, useMediaQuery } from "@mui/material";
+import { Box, Typography, Paper, Avatar, IconButton, Tooltip, useMediaQuery } from "@mui/material";
+import SortOutlinedIcon from "@mui/icons-material/SortOutlined";
 import { Task, TaskStatus } from "../types";
 import TaskCard from "./TaskCard";
 import emptyColumn from "../images/empty-column.svg";
@@ -44,10 +45,22 @@ export default function TaskColumn({
   onDuplicate,
   onDrop,
 }: Props) {
-  const filtered = tasks.filter((t) => t.status === status);
   const [dragOver, setDragOver] = useState(false);
+  const [sortByPriority, setSortByPriority] = useState(false);
   const config = columnConfig[status];
   const isMobile = useMediaQuery("(max-width:768px)");
+  const priorityOrder: Record<string, number> = {
+    URGENT: 0,
+    HIGH: 1,
+    MEDIUM: 2,
+    LOW: 3,
+  };
+  const baseFiltered = tasks.filter((t) => t.status === status);
+  const filtered = sortByPriority
+    ? [...baseFiltered].sort(
+        (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+      )
+    : baseFiltered;
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -101,18 +114,36 @@ export default function TaskColumn({
         >
           {title}
         </Typography>
-        <Avatar
-          sx={{
-            width: 26,
-            height: 26,
-            bgcolor: "#CED6D6",
-            color: "#000000",
-            fontSize: 13,
-            fontWeight: 500,
-          }}
-        >
-          {filtered.length}
-        </Avatar>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Tooltip
+            title={
+              sortByPriority ? "Ordenado por prioridade" : "Ordenar por prioridade"
+            }
+          >
+            <IconButton
+              size="small"
+              onClick={() => setSortByPriority((prev) => !prev)}
+              sx={{
+                color: sortByPriority ? config.titleColor : "action.disabled",
+                p: 0.5,
+              }}
+            >
+              <SortOutlinedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+          <Avatar
+            sx={{
+              width: 26,
+              height: 26,
+              bgcolor: config.badgeBg,
+              color: "#ffffff",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            {filtered.length}
+          </Avatar>
+        </Box>
       </Box>
       <Box>
         {filtered.length === 0 ? (
