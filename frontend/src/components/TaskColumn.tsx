@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Box, Typography, Paper, Avatar, IconButton, Tooltip, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Avatar,
+  IconButton,
+  Tooltip,
+  useMediaQuery,
+} from "@mui/material";
 import SortOutlinedIcon from "@mui/icons-material/SortOutlined";
 import { Task, TaskStatus } from "../types";
 import TaskCard from "./TaskCard";
@@ -117,7 +125,9 @@ export default function TaskColumn({
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           <Tooltip
             title={
-              sortByPriority ? "Ordenado por prioridade" : "Ordenar por prioridade"
+              sortByPriority
+                ? "Ordenado por prioridade"
+                : "Ordenar por prioridade"
             }
           >
             <IconButton

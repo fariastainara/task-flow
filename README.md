@@ -101,12 +101,12 @@ Abra o navegador em `http://localhost:5173`. Cadastre-se com e-mail e senha para
 
 ## Variáveis de ambiente
 
-| Variável       | Projeto  | Obrigatória | Descrição                                                    |
-| -------------- | -------- | ----------- | ------------------------------------------------------------ |
-| `SUPABASE_URL` | Backend  | Sim         | URL do projeto Supabase                                      |
-| `SUPABASE_KEY` | Backend  | Sim         | Chave anon pública do Supabase                               |
-| `PORT`         | Backend  | Não         | Porta do servidor (default: `3000`)                          |
-| `VITE_API_URL` | Frontend | Não         | URL base da API (default: `http://localhost:3000`)           |
+| Variável       | Projeto  | Obrigatória | Descrição                                          |
+| -------------- | -------- | ----------- | -------------------------------------------------- |
+| `SUPABASE_URL` | Backend  | Sim         | URL do projeto Supabase                            |
+| `SUPABASE_KEY` | Backend  | Sim         | Chave anon pública do Supabase                     |
+| `PORT`         | Backend  | Não         | Porta do servidor (default: `3000`)                |
+| `VITE_API_URL` | Frontend | Não         | URL base da API (default: `http://localhost:3000`) |
 
 ## API Endpoints
 
@@ -120,20 +120,20 @@ Abra o navegador em `http://localhost:5173`. Cadastre-se com e-mail e senha para
 
 ### Boards (`/boards`)
 
-| Método | Rota                                    | Descrição                         |
-| ------ | --------------------------------------- | --------------------------------- |
-| GET    | `/boards?userId=`                       | Listar quadros do usuário         |
-| GET    | `/boards/:id`                           | Buscar quadro por ID              |
-| POST   | `/boards`                               | Criar quadro                      |
-| PUT    | `/boards/:id`                           | Editar quadro                     |
-| DELETE | `/boards/:id`                           | Excluir quadro                    |
-| POST   | `/boards/:id/duplicate`                 | Duplicar quadro                   |
-| POST   | `/boards/reorder`                       | Reordenar quadros na sidebar      |
-| GET    | `/boards/:id/members`                   | Listar membros do quadro          |
-| POST   | `/boards/:id/members`                   | Convidar membro por e-mail        |
-| DELETE | `/boards/:id/members/:userId`           | Remover membro                    |
-| GET    | `/boards/invitations/pending?userId=`   | Listar convites pendentes         |
-| POST   | `/boards/:id/invitations/respond`       | Aceitar ou recusar convite        |
+| Método | Rota                                  | Descrição                    |
+| ------ | ------------------------------------- | ---------------------------- |
+| GET    | `/boards?userId=`                     | Listar quadros do usuário    |
+| GET    | `/boards/:id`                         | Buscar quadro por ID         |
+| POST   | `/boards`                             | Criar quadro                 |
+| PUT    | `/boards/:id`                         | Editar quadro                |
+| DELETE | `/boards/:id`                         | Excluir quadro               |
+| POST   | `/boards/:id/duplicate`               | Duplicar quadro              |
+| POST   | `/boards/reorder`                     | Reordenar quadros na sidebar |
+| GET    | `/boards/:id/members`                 | Listar membros do quadro     |
+| POST   | `/boards/:id/members`                 | Convidar membro por e-mail   |
+| DELETE | `/boards/:id/members/:userId`         | Remover membro               |
+| GET    | `/boards/invitations/pending?userId=` | Listar convites pendentes    |
+| POST   | `/boards/:id/invitations/respond`     | Aceitar ou recusar convite   |
 
 ### Tasks (`/tasks`)
 
