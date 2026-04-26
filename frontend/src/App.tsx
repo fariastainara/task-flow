@@ -18,12 +18,15 @@ import {
   IconButton,
   Drawer,
   Badge,
+  InputAdornment,
+  TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddOutlined";
 import GroupIcon from "@mui/icons-material/GroupOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import logoHeader from "./images/logo-header.svg";
 import backgroundEmptyKanban from "./images/background-empty-kanban.svg";
 import {
@@ -79,6 +82,7 @@ export default function App() {
   const [invitesOpen, setInvitesOpen] = useState(false);
   const [loadingBoards, setLoadingBoards] = useState(true);
   const [filterByUserId, setFilterByUserId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -174,6 +178,7 @@ export default function App() {
       loadTasks();
       loadMembers();
       setFilterByUserId(null);
+      setSearchQuery("");
     }
   }, [selectedBoardId, loadTasks, loadMembers]);
 
@@ -698,7 +703,23 @@ export default function App() {
                     </AvatarGroup>
                   )}
                 </Box>
-                <Box sx={{ display: "flex", gap: 1 }}>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  {!isMobile && (
+                    <TextField
+                      size="small"
+                      placeholder="Buscar tarefa"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchOutlinedIcon sx={{ fontSize: 18 }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ width: 200, bgcolor: "white", borderRadius: 1 }}
+                    />
+                  )}
                   <Button
                     variant="outlined"
                     startIcon={isMobile ? undefined : <GroupIcon />}
@@ -737,12 +758,190 @@ export default function App() {
                   </Button>
                 </Box>
               </Box>
+              {(isMobile || tasks.length > 0) && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    my: 3,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {isMobile && (
+                    <TextField
+                      size="small"
+                      placeholder="Buscar tarefa"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchOutlinedIcon sx={{ fontSize: 18 }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ width: "100%", bgcolor: "white", borderRadius: 1 }}
+                    />
+                  )}
+                  {tasks.length > 0 &&
+                    (() => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      const done = tasks.filter(
+                        (t) => t.status === TaskStatus.DONE,
+                      ).length;
+                      const overdue = tasks.filter(
+                        (t) =>
+                          t.status !== TaskStatus.DONE &&
+                          t.dueDate &&
+                          new Date(t.dueDate + "T00:00:00") < today,
+                      ).length;
+                      const inProgress = tasks.filter(
+                        (t) =>
+                          t.status === TaskStatus.IN_PROGRESS &&
+                          !(
+                            t.dueDate &&
+                            new Date(t.dueDate + "T00:00:00") < today
+                          ),
+                      ).length;
+                      const todo = tasks.length - done - overdue - inProgress;
+                      const pct = Math.round((done / tasks.length) * 100);
+                      const seg = (n: number) => `${(n / tasks.length) * 100}%`;
+                      return (
+                        <Box sx={{ flex: 1, minWidth: 200 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              mb: 0.5,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              fontWeight={600}
+                              color="text.primary"
+                            >
+                              Progresso geral
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {tasks.length}{" "}
+                              {tasks.length === 1 ? "tarefa" : "tarefas"} •{" "}
+                              {pct}%
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              height: 8,
+                              borderRadius: 4,
+                              overflow: "hidden",
+                              bgcolor: "#e0e0e0",
+                            }}
+                          >
+                            {done > 0 && (
+                              <Box
+                                sx={{
+                                  width: seg(done),
+                                  bgcolor: "#12B76A",
+                                  transition: "width 0.4s",
+                                }}
+                              />
+                            )}
+                            {inProgress > 0 && (
+                              <Box
+                                sx={{
+                                  width: seg(inProgress),
+                                  bgcolor: "#039BE5",
+                                  transition: "width 0.4s",
+                                }}
+                              />
+                            )}
+                            {overdue > 0 && (
+                              <Box
+                                sx={{
+                                  width: seg(overdue),
+                                  bgcolor: "#F04438",
+                                  transition: "width 0.4s",
+                                }}
+                              />
+                            )}
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 1.5,
+                              mt: 0.75,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            {[
+                              {
+                                label: "Concluídas",
+                                count: done,
+                                color: "#12B76A",
+                              },
+                              {
+                                label: "Em andamento",
+                                count: inProgress,
+                                color: "#039BE5",
+                              },
+                              {
+                                label: "Atrasadas",
+                                count: overdue,
+                                color: "#F04438",
+                              },
+                              {
+                                label: "A fazer",
+                                count: todo,
+                                color: "#9e9e9e",
+                              },
+                            ].map(({ label, count, color }) => (
+                              <Box
+                                key={label}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    bgcolor: color,
+                                    flexShrink: 0,
+                                  }}
+                                />
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {label} {count}
+                                </Typography>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                      );
+                    })()}
+                </Box>
+              )}
               <TaskBoard
-                tasks={
-                  filterByUserId
-                    ? tasks.filter((t) => t.assigneeId === filterByUserId)
-                    : tasks
-                }
+                tasks={tasks
+                  .filter(
+                    (t) => !filterByUserId || t.assigneeId === filterByUserId,
+                  )
+                  .filter(
+                    (t) =>
+                      !searchQuery ||
+                      t.title.toLowerCase().includes(searchQuery.toLowerCase()),
+                  )}
                 onEdit={setEditTask}
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
